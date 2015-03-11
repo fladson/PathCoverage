@@ -1,10 +1,16 @@
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+
+import org.apache.commons.collections4.CollectionUtils;
 
 import difflib.Chunk;
 import difflib.Delta;
@@ -28,32 +34,88 @@ import difflib.Patch;
  * 4. As mudanças são os métodos não cobertos
  */
 public class ComparisonAlgorithm {
-	private File all_methods;
+	private HashSet<String> all_methods;
 	private File covered_methods;
 
-	public ComparisonAlgorithm(File all_methods, File covered_methods) {
+	public ComparisonAlgorithm(HashSet<String> all_methods, File covered_methods) {
 		this.all_methods = all_methods;
 		this.covered_methods = covered_methods;
 	}
-	
-	public List<Delta> getDifferences() throws IOException{
-		System.out.println("Begin comparison of files: " + all_methods.getName() + " and " + covered_methods.getName());
-		final List<String> allMethodsFileLines = fileToLines(all_methods);
-		final List<String> coveredMethodsFileLines = fileToLines(covered_methods);
-		System.out.println("Sorting files...");
-		Collections.sort(allMethodsFileLines);
-		Collections.sort(coveredMethodsFileLines);
+
+	public Collection<String> getDifferences() throws IOException {
+		System.out.println("Begin comparison of methods with "
+				+ covered_methods.getName());
+		
+		// convertendo de volta para uma lista para ordenação
+		//final List<String> allMethodsList = new ArrayList<String>();
+		//allMethodsList.addAll(all_methods);
+		//this.all_methods.clear();
+		
+		final List<String> coveredMethodsList = fileToLines(covered_methods);
+		
+		Collection<String> different = CollectionUtils.subtract(all_methods, coveredMethodsList);
+		
+//		Collection<String> similar = new HashSet<String>( all_methods );
+//        Collection<String> different = new HashSet<String>();
+//        
+//        different.addAll( all_methods );
+//        different.addAll( coveredMethodsList );
+//
+//        similar.retainAll( coveredMethodsList );
+//        different.removeAll( similar );
+        
+		//System.out.println("Sorting files...");
+		//Collections.sort(allMethodsList);
+		//Collections.sort(coveredMethodsFileLines);
+		
 		System.out.println("Diffing files...");
-		final Patch patch = DiffUtils.diff(allMethodsFileLines, coveredMethodsFileLines);
-		System.out.println("Ended file comparison in XX.XX seconds");
-		System.out.println("=== Statistics ===");
-		System.out.println("Total of methods: " + allMethodsFileLines.size());
-		System.out.println("Total of methods covered: " + coveredMethodsFileLines.size());
-		System.out.println("Total of methods not covered: " + patch.getDeltas().size());
-		System.out.println("Percentage of coverage: " + (coveredMethodsFileLines.size()*100)/allMethodsFileLines.size() + "%");
-		return patch.getDeltas();
+		//int previousAllMethodsSize = all_methods.size();
+
+		// Escrevendo em um arquivo os métodos não cobertos (apenas para
+		// checagem)
+		FileWriter out = null;
+		try {
+			out = new FileWriter("allMethods.txt");
+			for (String string : all_methods) {
+				out.write(string + "\r\n");
+			}
+		} finally {
+			out.close();
+		}
+
+		//all_methods.removeAll(coveredMethodsList);
+
+		// final Patch patch = DiffUtils.diff(allMethodsList,
+		// coveredMethodsFileLines);
+		// final List<Chunk> listOfChanges = new ArrayList<Chunk>();
+		// final List<Delta> deltas = patch.getDeltas();
+		// for (Delta delta : deltas) {
+		// if (delta.getType() == Delta.TYPE.CHANGE) {
+		// listOfChanges.add(delta.getRevised());
+		// }
+		// }
+
+		System.out.println("Ended methods comparison");
+		System.out.println("===== Statistics =====");
+		System.out.println("Total of methods: " + all_methods.size());
+		System.out.println("Total of methods covered: "
+				+ coveredMethodsList.size());
+		System.out.println("Total of methods not covered: "
+				+ different.size());
+		System.out.println("Percentage of coverage: "
+				+ (coveredMethodsList.size() * 100f)
+				/ all_methods.size() + "%");
+		System.out.println("Algum método no conjunto de cobertos está incluso no conjunto de não cobertos? " + CollectionUtils.containsAny(coveredMethodsList, different));
+		System.out.println("Algum método no conjunto de não cobertos está incluso no conjunto de cobertos? " + CollectionUtils.containsAny(different, coveredMethodsList));
+		Collection<String> prova = CollectionUtils.subtract(all_methods, different);
+		for (String string : prova) {
+			System.out.println(string);
+		}
+		// return patch.getDeltas();
+
+		return different;
 	}
-	
+
 	private List<String> fileToLines(File file) throws IOException {
 		final List<String> lines = new ArrayList<String>();
 		String line;
@@ -64,44 +126,45 @@ public class ComparisonAlgorithm {
 		in.close();
 		return lines;
 	}
-	
-	public List<Chunk> getChangesFromOriginal() throws IOException {
-		return getChunksByType(Delta.TYPE.CHANGE);
-	}
 
-	public List<Chunk> getInsertsFromOriginal() throws IOException {
-		return getChunksByType(Delta.TYPE.INSERT);
-	}
-
-	public List<Chunk> getDeletesFromOriginal() throws IOException {
-		return getChunksByType(Delta.TYPE.DELETE);
-	}
-
-	private List<Chunk> getChunksByType(Delta.TYPE type) throws IOException {
-		final List<Chunk> listOfChanges = new ArrayList<Chunk>();
-		final List<Delta> deltas = getDifferences();
-		for (Delta delta : deltas) {
-			if (delta.getType() == type) {
-				listOfChanges.add(delta.getRevised());
-			}
-		}
-		return listOfChanges;
-	}
-//
-//	private List<Delta> getDeltas() throws IOException {
-//		final List<String> originalFileLines = fileToLines(original);
-//		final List<String> revisedFileLines = fileToLines(revised);
-//		final Patch patch = DiffUtils.diff(originalFileLines, revisedFileLines);
-//		return patch.getDeltas();
-//	}
-	
-	
-//	private void sortLines(List<String> linesToSort, String fileToWrite) throws IOException{
-//	    Collections.sort(linesToSort);
-//	    FileWriter writer = new FileWriter(fileToWrite);
-//	    for(String cur: linesToSort)
-//	    	writer.write(cur+"\n");
-//	    writer.close();
-//	}
+	// public List<Chunk> getChangesFromOriginal() throws IOException {
+	// return getChunksByType(Delta.TYPE.CHANGE);
+	// }
+	//
+	// public List<Chunk> getInsertsFromOriginal() throws IOException {
+	// return getChunksByType(Delta.TYPE.INSERT);
+	// }
+	//
+	// public List<Chunk> getDeletesFromOriginal() throws IOException {
+	// return getChunksByType(Delta.TYPE.DELETE);
+	// }
+	//
+	// private List<Chunk> getChunksByType(Delta.TYPE type) throws IOException {
+	// final List<Chunk> listOfChanges = new ArrayList<Chunk>();
+	// final List<Delta> deltas = getDeltas();
+	// for (Delta delta : deltas) {
+	// if (delta.getType() == type) {
+	// listOfChanges.add(delta.getRevised());
+	// }
+	// }
+	// return listOfChanges;
+	// }
+	// //
+	// private List<Delta> getDeltas() throws IOException {
+	// final List<String> originalFileLines = fileToLines(original);
+	// final List<String> revisedFileLines = fileToLines(revised);
+	// final Patch patch = DiffUtils.diff(originalFileLines, revisedFileLines);
+	// return patch.getDeltas();
+	// }
+	//
+	//
+	// private void sortLines(List<String> linesToSort, String fileToWrite)
+	// throws IOException{
+	// Collections.sort(linesToSort);
+	// FileWriter writer = new FileWriter(fileToWrite);
+	// for(String cur: linesToSort)
+	// writer.write(cur+"\n");
+	// writer.close();
+	// }
 
 }

@@ -1,5 +1,6 @@
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.jar.JarFile;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -19,39 +20,50 @@ public class MethodListWALA {
 	/*
 	 * Gets a jar and outputs its methods to a txt file
 	 */
-	public static String getMethodsFromJar(String pathToJar) throws IOException, ClassHierarchyException {
-		System.out.println("Analysing paths with WALA from jar at: "+ pathToJar);
+	public static HashSet<String> getMethodsFromJar(String pathToJar,
+			HashSet<String> allMethodsDistinct) throws IOException,
+			ClassHierarchyException {
+		System.out.println("Analysing paths with WALA from jar at: "
+				+ pathToJar);
 		String system_name = Main.getSystemNameFromPath(pathToJar);
-		String output_file = "/Volumes/Beta/Mestrado/workspace_luna/" + system_name + "_wala.txt";
-		
+		String output_file = "/Volumes/Beta/Mestrado/workspace_luna/"
+				+ system_name + "_wala.txt";
+
 		AnalysisScope scope = AnalysisScope.createJavaAnalysisScope();
 
 		scope.addToScope(ClassLoaderReference.Primordial, new JarFile(
 				"/Volumes/Beta/Mestrado/workspace_luna/jsdg-stubs-jre1.5.jar"));
-		scope.addToScope(ClassLoaderReference.Application, new JarFile(pathToJar));
+		scope.addToScope(ClassLoaderReference.Application, new JarFile(
+				pathToJar));
 		IClassHierarchy cha = ClassHierarchy.make(scope);
-		FileWriter out = null;
-		try {
-			out = new FileWriter(output_file);
-			for (IClass cl : cha) {
-				if (cl.getClassLoader().getReference()
-						.equals(ClassLoaderReference.Application)) {
-					for (IMethod m : cl.getAllMethods()) {
-						// Filtro para métodos nativos do Java e suas libs
-						if (!m.getReference().toString().contains("< Primordial,")) {
-								// Filtro para métodos em pacotes de teste
-								if(!m.getSignature().contains(".test.")){
-									out.write(getStandartMethodSignature(m) + "\r\n");
-								}
+		// FileWriter out = null;
+		// try {
+		// out = new FileWriter(output_file);
+		for (IClass cl : cha) {
+			if (cl.getClassLoader().getReference()
+					.equals(ClassLoaderReference.Application)) {
+				for (IMethod m : cl.getAllMethods()) {
+					// Filtro para métodos nativos do Java e suas libs
+					if (!m.getReference().toString().contains("< Primordial,")) {
+						// Filtro para métodos em pacotes de teste
+						if (!m.getSignature().contains("Test")) {
+							if (!m.getSignature().contains(".test.")) {
+								// System.out.println(m.getSignature());
+								allMethodsDistinct
+										.add(getStandartMethodSignature(m));
+								// out.write(getStandartMethodSignature(m) +
+								// "\r\n");
+							}
 						}
 					}
 				}
 			}
-		} finally {
-			out.close();
-			System.out.println("Ended WALA analysis of " + system_name+".jar in XX.XX seconds");
 		}
-		return output_file;
+		// } finally {
+		// out.close();
+		System.out.println("Ended WALA analysis of " + system_name + ".jar");
+		// }
+		return allMethodsDistinct;
 	}
 
 	/*
