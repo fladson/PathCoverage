@@ -2,18 +2,13 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
+	<classpathentry kind="lib" path="C:/Users/Fladson Gomes/Downloads/libs/commons-collections4-4.0/commons-collections4-4.0.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/br.ufrn.dimap.plea.flowanalyzer"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.cast"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.cast.java"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.core"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.core.testdata"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.core.tests"/>
+	<classpathentry combineaccessrules="false" exported="true" kind="src" path="/com.ibm.wala.core"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.ide"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.shrike"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.util"/>
-	<classpathentry kind="lib" path="/Volumes/Beta/Mestrado/workspace_luna/commons-collections4-4.0/commons-collections4-4.0.jar" sourcepath="/Volumes/Beta/Mestrado/workspace_luna/commons-collections4-4.0/commons-collections4-4.0-sources.jar">
-		<attributes>
-			<attribute name="javadoc_location" value="file:/Volumes/Beta/Mestrado/workspace_luna/commons-collections4-4.0/apidocs/"/>
-		</attributes>
-	</classpathentry>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
