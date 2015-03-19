@@ -5,17 +5,10 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.collections4.CollectionUtils;
-
-import difflib.Chunk;
-import difflib.Delta;
-import difflib.DiffUtils;
-import difflib.Patch;
 
 /*
  * Algoritmo de comparação dos arquivos com os paths
@@ -34,26 +27,40 @@ import difflib.Patch;
  * 4. As mudanças são os métodos não cobertos
  */
 public class ComparisonAlgorithm {
-	private HashSet<String> all_methods;
-	private File covered_methods;
+	private HashSet<String> all_methods_master;
+	private File covered_methods_master;
+	private HashSet<String> all_methods_updated;
+	private File covered_methods_updated;
 
-	public ComparisonAlgorithm(HashSet<String> all_methods, File covered_methods) {
-		this.all_methods = all_methods;
-		this.covered_methods = covered_methods;
+	public ComparisonAlgorithm(HashSet<String> all_methods_master, File covered_methods_master, HashSet<String> all_methods_updated, File covered_methods_updated) {
+		this.all_methods_master = all_methods_master;
+		this.covered_methods_master = covered_methods_master;
+		this.all_methods_updated = all_methods_updated;
+		this.covered_methods_updated = covered_methods_updated;
 	}
 
-	public Collection<String> getDifferences() throws IOException {
-		System.out.println("Begin comparison of methods with "
-				+ covered_methods.getName());
+	public Collection<String> runComparison() throws IOException {
+		System.out.println("Comparando as versões");
+		System.out.println("Comparando métodos de " + covered_methods_master.getName());
 		
 		// convertendo de volta para uma lista para ordenação
 		//final List<String> allMethodsList = new ArrayList<String>();
 		//allMethodsList.addAll(all_methods);
 		//this.all_methods.clear();
 		
-		final List<String> coveredMethodsList = fileToLines(covered_methods);
+		//Lendo arquivo da ferramenta de Felipe para uma lista de strings
+		final List<String> list_covered_methods_master = fileToLines(covered_methods_master);
+		//Fazendo a diferença entre as listas
+		Collection<String> list_not_covered_methods_master = CollectionUtils.subtract(all_methods_master, list_covered_methods_master);
 		
-		Collection<String> different = CollectionUtils.subtract(all_methods, coveredMethodsList);
+		System.out.println("Comparando métodos de " + covered_methods_updated.getName());
+		//Lendo arquivo da ferramenta de Felipe para uma lista de strings
+		final List<String> list_covered_methods_updated = fileToLines(covered_methods_updated);
+		//Fazendo a diferença entre as listas
+		Collection<String> list_not_covered_methods_updated = CollectionUtils.subtract(all_methods_updated, list_covered_methods_updated);
+				
+		
+		
 		
 //		Collection<String> similar = new HashSet<String>( all_methods );
 //        Collection<String> different = new HashSet<String>();
@@ -69,51 +76,35 @@ public class ComparisonAlgorithm {
 		//Collections.sort(coveredMethodsFileLines);
 		
 		System.out.println("Diffing files...");
-		//int previousAllMethodsSize = all_methods.size();
 
-		// Escrevendo em um arquivo os métodos não cobertos (apenas para
-		// checagem)
+		// Escrevendo em um arquivo os métodos não cobertos (apenas para checagem)
 		FileWriter out = null;
 		try {
 			out = new FileWriter("allMethods.txt");
-			for (String string : all_methods) {
+			for (String string : all_methods_master) {
 				out.write(string + "\r\n");
 			}
 		} finally {
 			out.close();
 		}
 
-		//all_methods.removeAll(coveredMethodsList);
-
-		// final Patch patch = DiffUtils.diff(allMethodsList,
-		// coveredMethodsFileLines);
-		// final List<Chunk> listOfChanges = new ArrayList<Chunk>();
-		// final List<Delta> deltas = patch.getDeltas();
-		// for (Delta delta : deltas) {
-		// if (delta.getType() == Delta.TYPE.CHANGE) {
-		// listOfChanges.add(delta.getRevised());
-		// }
-		// }
-
 		System.out.println("Ended methods comparison");
 		System.out.println("===== Statistics =====");
-		System.out.println("Total of methods: " + all_methods.size());
+		System.out.println("Total of methods: " + all_methods_master.size());
 		System.out.println("Total of methods covered: "
-				+ coveredMethodsList.size());
+				+ list_covered_methods_master.size());
 		System.out.println("Total of methods not covered: "
-				+ different.size());
+				+ list_not_covered_methods_master.size());
 		System.out.println("Percentage of coverage: "
-				+ (coveredMethodsList.size() * 100f)
-				/ all_methods.size() + "%");
-		System.out.println("Algum método no conjunto de cobertos está incluso no conjunto de não cobertos? " + CollectionUtils.containsAny(coveredMethodsList, different));
-		System.out.println("Algum método no conjunto de não cobertos está incluso no conjunto de cobertos? " + CollectionUtils.containsAny(different, coveredMethodsList));
-		Collection<String> prova = CollectionUtils.subtract(all_methods, different);
+				+ (list_covered_methods_master.size() * 100f)
+				/ all_methods_master.size() + "%");
+		System.out.println("Algum método no conjunto de cobertos está incluso no conjunto de não cobertos? " + CollectionUtils.containsAny(list_covered_methods_master, list_not_covered_methods_master));
+		System.out.println("Algum método no conjunto de não cobertos está incluso no conjunto de cobertos? " + CollectionUtils.containsAny(list_not_covered_methods_master, list_covered_methods_master));
+		Collection<String> prova = CollectionUtils.subtract(all_methods_master, list_not_covered_methods_master);
 		for (String string : prova) {
 			System.out.println(string);
 		}
-		// return patch.getDeltas();
-
-		return different;
+		return list_not_covered_methods_master;
 	}
 
 	private List<String> fileToLines(File file) throws IOException {

@@ -9,24 +9,37 @@ import java.util.regex.Pattern;
 
 import com.ibm.wala.ipa.cha.ClassHierarchyException;
 
+/*
+ * O ideal é passar os dois jars das versões diferentes para comparação automática.
+ */
 
 public class Main {
 	
-	protected static HashSet<String> allMethodsDistinct;
+	protected static HashSet<String> all_methods_wala_master;
+	protected static HashSet<String> all_methods_wala_updated;
 	
 	public static void main(String[] args) {
 		try {
 			System.out.println("========== Begin ==========");
-			String jarPath = "/Volumes/Beta/Mestrado/workspace_luna/scribe.jar";
-			allMethodsDistinct = new HashSet<String>();
-//			MethodListWALA methodLister = new MethodListWALA();
-			allMethodsDistinct = MethodListWALA.getMethodsFromJar(jarPath, allMethodsDistinct);
+			String jar_master = "teste_master";
+			String jar_updated = "teste_updated";
+			String jar_master_path = "/Volumes/Beta/Mestrado/workspace_luna/jars_directory/" + jar_master + ".jar";
+			String jar_updated_path = "/Volumes/Beta/Mestrado/workspace_luna/jars_directory/" + jar_updated + ".jar";
 			
-//			File WALA_output = new File (wala_file_path);
-			String sca_file_path = "/Volumes/Beta/Mestrado/workspace_luna/" + getSystemNameFromPath(jarPath) + "_sca";
-			File SCA_output = new File (sca_file_path);
-			ComparisonAlgorithm comp = new ComparisonAlgorithm(allMethodsDistinct,SCA_output);
-			Collection<String> methodsNotCovered = comp.getDifferences();
+			all_methods_wala_master = new HashSet<String>();
+			all_methods_wala_master = MethodListWALA.getMethodsFromJar(jar_master_path, all_methods_wala_master);
+			
+			all_methods_wala_updated = new HashSet<String>();
+			all_methods_wala_updated = MethodListWALA.getMethodsFromJar(jar_updated_path, all_methods_wala_updated);
+
+			String sca_master_file_path = "/Volumes/Beta/Mestrado/workspace_luna/jars_directory/" + jar_master + "_sca";
+			File sca_master_output = new File (sca_master_file_path);
+			
+			String sca_updated_file_path = "/Volumes/Beta/Mestrado/workspace_luna/jars_directory/" + jar_updated + "_sca";
+			File sca_updated_output = new File (sca_updated_file_path);
+			
+			ComparisonAlgorithm comp = new ComparisonAlgorithm(all_methods_wala_master,sca_master_output,all_methods_wala_updated,sca_updated_output);
+			Collection<String> methodsNotCovered = comp.runComparison();
 			
 			// Escrevendo em um arquivo os métodos não cobertos (apenas para checagem)
 			FileWriter out = null;
