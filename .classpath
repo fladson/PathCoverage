@@ -2,13 +2,67 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
-	<classpathentry kind="lib" path="C:/Users/Fladson Gomes/Downloads/libs/commons-collections4-4.0/commons-collections4-4.0.jar"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/br.ufrn.dimap.plea.flowanalyzer"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.cast"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.cast.java"/>
-	<classpathentry combineaccessrules="false" exported="true" kind="src" path="/com.ibm.wala.core"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.core"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.ide"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.shrike"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.util"/>
+	<classpathentry kind="lib" path="/Volumes/Beta/Mestrado/workspace_luna/jars_directory/commons-collections4-4.0/commons-collections4-4.0.jar"/>
+	<classpathentry kind="lib" path="/Volumes/Beta/Mestrado/workspace_luna/jars_directory/google-gson-2.2.4/gson-2.2.4.jar"/>
+	<classpathentry kind="lib" path="/Volumes/Beta/Mestrado/workspace_luna/jars_directory/github/org.eclipse.egit.github.core-2.1.5.jar"/>
+	<classpathentry kind="lib" path="/Volumes/Beta/Mestrado/workspace_luna/jars_directory/org.eclipse.jgit-3.3.2.201404171909-r.jar"/>
+	<classpathentry kind="lib" path="/Volumes/Beta/Mestrado/workspace_luna/jars_directory/jsch-0.1.51.jar"/>
+	<classpathentry kind="lib" path="/Applications/eclipse_luna/plugins/org.eclipse.core.resources_3.9.1.v20140825-1431.jar" sourcepath="/Applications/eclipse_luna/plugins/org.eclipse.core.resources_3.9.1.v20140825-1431.jar">
+		<accessrules>
+			<accessrule kind="discouraged" pattern="org/eclipse/core/internal/dtree/*"/>
+			<accessrule kind="discouraged" pattern="org/eclipse/core/internal/events/*"/>
+			<accessrule kind="discouraged" pattern="org/eclipse/core/internal/localstore/*"/>
+			<accessrule kind="discouraged" pattern="org/eclipse/core/internal/properties/*"/>
+			<accessrule kind="discouraged" pattern="org/eclipse/core/internal/propertytester/*"/>
+			<accessrule kind="discouraged" pattern="org/eclipse/core/internal/refresh/*"/>
+			<accessrule kind="discouraged" pattern="org/eclipse/core/internal/resources/*"/>
+			<accessrule kind="discouraged" pattern="org/eclipse/core/internal/resources/mapping/*"/>
+			<accessrule kind="discouraged" pattern="org/eclipse/core/internal/resources/projectvariables/*"/>
+			<accessrule kind="discouraged" pattern="org/eclipse/core/internal/resources/refresh/win32/*"/>
+			<accessrule kind="discouraged" pattern="org/eclipse/core/internal/utils/*"/>
+			<accessrule kind="discouraged" pattern="org/eclipse/core/internal/watson/*"/>
+			<accessrule kind="accessible" pattern="org/eclipse/core/resources/*"/>
+			<accessrule kind="accessible" pattern="org/eclipse/core/resources/filtermatchers/*"/>
+			<accessrule kind="accessible" pattern="org/eclipse/core/resources/mapping/*"/>
+			<accessrule kind="accessible" pattern="org/eclipse/core/resources/refresh/*"/>
+			<accessrule kind="accessible" pattern="org/eclipse/core/resources/team/*"/>
+			<accessrule kind="accessible" pattern="org/eclipse/core/resources/variableresolvers/*"/>
+			<accessrule ignoreifbetter="true" kind="nonaccessible" pattern="**/*"/>
+		</accessrules>
+	</classpathentry>
+	<classpathentry kind="lib" path="/Applications/eclipse_luna/plugins/org.eclipse.core.commands_3.6.100.v20140528-1422.jar" sourcepath="/Applications/eclipse_luna/plugins/org.eclipse.core.commands.source_3.6.100.v20140528-1422.jar">
+		<accessrules>
+			<accessrule kind="accessible" pattern="org/eclipse/core/commands/*"/>
+			<accessrule kind="accessible" pattern="org/eclipse/core/commands/common/*"/>
+			<accessrule kind="accessible" pattern="org/eclipse/core/commands/contexts/*"/>
+			<accessrule kind="accessible" pattern="org/eclipse/core/commands/operations/*"/>
+			<accessrule kind="accessible" pattern="org/eclipse/core/commands/util/*"/>
+			<accessrule kind="discouraged" pattern="org/eclipse/core/internal/commands/operations/*"/>
+			<accessrule kind="discouraged" pattern="org/eclipse/core/internal/commands/util/*"/>
+			<accessrule ignoreifbetter="true" kind="nonaccessible" pattern="**/*"/>
+		</accessrules>
+	</classpathentry>
+	<classpathentry kind="lib" path="/Volumes/Beta/Downloads/lib/commons-collections-3.2.1.jar"/>
+	<classpathentry kind="lib" path="/Volumes/Beta/Downloads/lib/commons-configuration-1.6.jar"/>
+	<classpathentry kind="lib" path="/Volumes/Beta/Downloads/lib/commons-lang-2.5.jar"/>
+	<classpathentry kind="lib" path="/Volumes/Beta/Downloads/lib/commons-logging-1.1.1.jar"/>
+	<classpathentry kind="lib" path="/Volumes/Beta/Downloads/lib/org.eclipse.core.contenttype_3.4.1.R35x_v20090826-0451.jar"/>
+	<classpathentry kind="lib" path="/Volumes/Beta/Downloads/lib/org.eclipse.core.jobs_3.4.100.v20090429-1800.jar"/>
+	<classpathentry kind="lib" path="/Volumes/Beta/Downloads/lib/org.eclipse.core.resources_3.5.2.R35x_v20091203-1235.jar"/>
+	<classpathentry kind="lib" path="/Volumes/Beta/Downloads/lib/org.eclipse.core.runtime_3.5.0.v20090525.jar"/>
+	<classpathentry kind="lib" path="/Volumes/Beta/Downloads/lib/org.eclipse.equinox.common_3.5.1.R35x_v20090807-1100.jar"/>
+	<classpathentry kind="lib" path="/Volumes/Beta/Downloads/lib/org.eclipse.equinox.preferences_3.2.301.R35x_v20091117.jar"/>
+	<classpathentry kind="lib" path="/Volumes/Beta/Downloads/lib/org.eclipse.jdt.core_3.5.2.v_981_R35x.jar"/>
+	<classpathentry kind="lib" path="/Volumes/Beta/Downloads/lib/org.eclipse.osgi_3.5.2.R35x_v20100126.jar"/>
+	<classpathentry kind="lib" path="/br.ufrn.ppgsc.scenario.analyzer.libs/libs/hibernate_3.6.10/hibernate-jpa-2.0-api-1.0.1.Final.jar"/>
+	<classpathentry kind="lib" path="/br.ufrn.ppgsc.scenario.analyzer.libs/libs/hibernate_3.6.10/hibernate3.jar"/>
+	<classpathentry kind="lib" path="/br.ufrn.ppgsc.scenario.analyzer.libs/libs/postgresql-9.3-1102.jdbc41.jar"/>
+	<classpathentry kind="lib" path="/Volumes/Beta/Downloads/jgrapht-0.9.0/lib/jgrapht-ext-0.9.0-uber.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -10,7 +10,7 @@ public interface RepositoryConnector {
 
 	public String getPreviousRevision(String path, String actualRevision) throws Exception;
 	
-	public abstract void performSetup();
+	public abstract void performSetup(String repositoryLocalPath);
 
 	public abstract String getRepositoryPath();
 

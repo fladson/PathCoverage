@@ -105,9 +105,8 @@ public class CallGraphWALA {
 	public void loadAnalysisScope (String application_path) throws IOException
 	{					
 		this.analysisScope = AnalysisScope.createJavaAnalysisScope();
-//		analysisScope.addToScope(ClassLoaderReference.Primordial, new JarFile(
-//				"/Volumes/Beta/Mestrado/workspace_luna/jsdg-stubs-jre1.5.jar"));
-		analysisScope.addToScope(ClassLoaderReference.Primordial, new JarFile("C:/Users/Fladson Gomes/Downloads/libs/jsdg-stubs-jre1.5.jar"));
+		analysisScope.addToScope(ClassLoaderReference.Primordial, new JarFile("/Volumes/Beta/Mestrado/workspace_luna/jars_directory/jsdg-stubs-jre1.5.jar"));
+//		analysisScope.addToScope(ClassLoaderReference.Primordial, new JarFile("C:/Users/Fladson Gomes/Downloads/libs/jsdg-stubs-jre1.5.jar"));
 		ClassLoaderReference loader = analysisScope.getLoader(AnalysisScope.APPLICATION);	
 		addClassPathToScope(application_path, analysisScope, loader);
 	}
@@ -129,8 +128,8 @@ public class CallGraphWALA {
 				Iterable<Entrypoint> entrypoints = null;
 				entrypoints = Util.makeMainEntrypoints(this.analysisScope,this.classHierarchy);
 				if(!entrypoints.iterator().hasNext()){
-					// a aplicação não possui main, tentando pegar entrypoint dos testes
-//					O WALA não suporta o Junit 4, ficando inviável pegar o entrypoint dos testes visto que as anotações são necessárias
+					// a aplicaï¿½ï¿½o nï¿½o possui main, tentando pegar entrypoint dos testes
+//					O WALA nï¿½o suporta o Junit 4, ficando inviï¿½vel pegar o entrypoint dos testes visto que as anotaï¿½ï¿½es sï¿½o necessï¿½rias
 //					para rodar o framework de Felipe
 //					entrypoints = JUnitEntryPoints.make(classHierarchy);
 					
@@ -149,7 +148,7 @@ public class CallGraphWALA {
 				AnalysisCache cache = new AnalysisCache();
 
 				/**
-				 * mais informações:
+				 * mais informaï¿½ï¿½es:
 				 * http://wala.sourceforge.net/wiki/index.php/UserGuide
 				 * :PointerAnalysis#Improving_Scalability
 				 */
@@ -157,7 +156,7 @@ public class CallGraphWALA {
 
 				SSAPropagationCallGraphBuilder builder = null;
 
-				// if(this.loader.isZeroCFA()){ // configuração da análise
+				// if(this.loader.isZeroCFA()){ // configuraï¿½ï¿½o da anï¿½lise
 				// 0-CFA.
 				IClassHierarchy cha = this.classHierarchy;
 				AnalysisScope scope = this.analysisScope;
@@ -167,12 +166,12 @@ public class CallGraphWALA {
 				System.out.println((new Date()).toString() + " - CallGraph created.");
 				System.out.println(CallGraphStats.getStats(cg));
 
-				// imprime todas as ramificações a partir dos entries points até um cgnode primordial.
-				Collection<CGNode> entries = cg.getEntrypointNodes();
-				for (Iterator<CGNode> i = entries.iterator(); i.hasNext();) {
-					CGNode entrypoint = i.next();
-					printCallGraphNode(cg, entrypoint, 0);
-				}
+				// imprime todas as ramificaï¿½ï¿½es a partir dos entries points atï¿½ um cgnode primordial.
+//				Collection<CGNode> entries = cg.getEntrypointNodes();
+//				for (Iterator<CGNode> i = entries.iterator(); i.hasNext();) {
+//					CGNode entrypoint = i.next();
+//					printCallGraphNode(cg, entrypoint, 0);
+//				}
 			} catch (IOException e) {
 				e.printStackTrace();
 			} catch (IllegalArgumentException e) {

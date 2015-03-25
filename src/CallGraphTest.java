@@ -7,8 +7,8 @@ public class CallGraphTest {
 	public static void main(String[] args) throws ClassHierarchyException {
 		CallGraphWALA cg = new CallGraphWALA();
 		try {
-			cg.init("C:/Users/Fladson Gomes/Desktop/workspace_luna/teste");
-//			cg.init("C:/Users/Fladson Gomes/Desktop/workspace_luna/teste");
+//			cg.init("C:/Users/Fladson Gomes/Desktop/workspace_luna/teste"); 
+			cg.init("/Users/fladson/git/SamplePathCoverage");
 		} catch (UnsupportedOperationException | InvalidClassFileException e) {
 			e.printStackTrace();
 		}

@@ -1,5 +1,7 @@
 package br.ufrn.ppgsc.pac.connectors;
 
+import java.util.List;
+
 /**
  * UNIVERSIDADE FEDERAL DO RIO GRANDE DO NORTE - UFRN
  * DEPARTAMENTO DE INFORMATICA E MATEMATICA APLICADA - DIMAP
@@ -20,6 +22,7 @@ public abstract class Connector {
 	protected String url;
 	protected String user;
 	protected String password;
+	protected String repositoryLocalPath;
 
 	public Connector() {
 
@@ -39,6 +42,13 @@ public abstract class Connector {
 	 */
 	public void performRun() {
 
+	}
+	public List<String> getFilesOfRevision(String Revision){
+		return null;
+	}
+	
+	public List<String> getMethodsChangedOfRevision(String Revision){
+		return null;
 	}
 
 	public String getUrl() {
@@ -87,6 +97,14 @@ public abstract class Connector {
 
 	public void setEndVersion(String endVersion) {
 		this.endVersion = endVersion;
+	}
+
+	public String getRepositoryLocalPath() {
+		return repositoryLocalPath;
+	}
+
+	public void setRepositoryLocalPath(String repositoryLocalPath) {
+		this.repositoryLocalPath = repositoryLocalPath;
 	}
 
 	@Override

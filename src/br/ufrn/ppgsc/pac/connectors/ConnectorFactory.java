@@ -48,10 +48,11 @@ public class ConnectorFactory {
 		String connectorName = propConfig.getProperty("REPOSITORY_CONNECTOR");
 		Properties propConnector = getProperties("connectors");
 		RepositoryConnector connector = (RepositoryConnector) Class.forName(propConnector.getProperty(connectorName)).newInstance();
-		if(connector instanceof GitConnector){
-			GitConnector gitConnector = (GitConnector) connector;
-			gitConnector.performSetup();
-		}
+//		if(connector instanceof GitConnector){
+//			GitConnector gitConnector = (GitConnector) connector;
+//			gitConnector.performSetup();
+//		}
+		//Nao posso fazer o setup aqui pois nao tenho o path do repositorio clonado
 		return connector;
 	}
 	
