@@ -93,6 +93,7 @@ public class GithubConnector extends Connector {
 				.setURI(githubRepositoryService.getRepository(repository_id).getCloneUrl())
 				.setDirectory(file)
 				.call();
+				
 				if(repo.getRepository() == null)
 					System.out.println("Erro no clone do repositório");
 				else
@@ -116,6 +117,7 @@ public class GithubConnector extends Connector {
 	}
 	
 	public List<String> getMethodsChangedOfRevision(String Revision){
+		
 		return null;
 	}
 	

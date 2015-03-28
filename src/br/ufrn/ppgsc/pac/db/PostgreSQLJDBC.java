@@ -75,7 +75,7 @@ public class PostgreSQLJDBC {
 			ResultSet rs = stmt
 					.executeQuery("select * from node where parent_id in (" + rootsIds + ");");
 			while (rs.next()) {
-				nodes.add(new Node(rs.getInt("id"), rs.getString("member"), rs.getInt("parent_id")));
+				nodes.add(new Node(rs.getInt("id"), rs.getString("member"), rs.getInt("parent_id"), 1));
 			}
 			rs.close();
 			stmt.close();
@@ -93,7 +93,7 @@ public class PostgreSQLJDBC {
 			ResultSet rs = stmt
 					.executeQuery("SELECT id, member, parent_id FROM NODE where id = "+ id + ";");
 			while (rs.next()) {
-				node = new Node(rs.getInt("id"), rs.getString("member"), rs.getInt("parent_id"));
+				node = new Node(rs.getInt("id"), rs.getString("member"), rs.getInt("parent_id"),0);
 			}
 			rs.close();
 			stmt.close();
@@ -111,7 +111,7 @@ public class PostgreSQLJDBC {
 			ResultSet rs = stmt
 					.executeQuery("SELECT id, member, parent_id FROM NODE where parent_id = "+ id + ";");
 			while (rs.next()) {
-				node = new Node(rs.getInt("id"), rs.getString("member"), rs.getInt("parent_id"));
+				node = new Node(rs.getInt("id"), rs.getString("member"), rs.getInt("parent_id"),0);
 			}
 			rs.close();
 			stmt.close();

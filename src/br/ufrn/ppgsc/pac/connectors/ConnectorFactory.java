@@ -60,6 +60,7 @@ public class ConnectorFactory {
 		Properties props = new Properties();
 		FileInputStream file = new FileInputStream(System.getProperty("user.dir") + "/src/properties/" + filename + ".properties");
 		props.load(file);
+		file.close();
 		return props;
 	}
 }

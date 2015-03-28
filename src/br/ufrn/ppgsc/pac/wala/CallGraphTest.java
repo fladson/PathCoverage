@@ -1,3 +1,4 @@
+package br.ufrn.ppgsc.pac.wala;
 import com.ibm.wala.ipa.cha.ClassHierarchyException;
 import com.ibm.wala.shrikeCT.InvalidClassFileException;
 

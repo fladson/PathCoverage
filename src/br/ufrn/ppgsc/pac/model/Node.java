@@ -9,12 +9,15 @@ public class Node {
 	protected String method_signature;
 	protected int parent_id;
 	protected List<Node> children;
+	// -1 = não, 1 = sim e 0 = indefinido
+	protected int covered;
 	
-	public Node(int id, String method_signature, int parent_id) {
+	public Node(int id, String method_signature, int parent_id, int covered) {
 		super();
 		this.id = id;
 		this.method_signature = method_signature;
 		this.parent_id = parent_id;
+		this.covered = covered;
 	}
 
 	public int getId() {

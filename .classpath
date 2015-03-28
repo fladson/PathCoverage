@@ -48,7 +48,6 @@
 			<accessrule ignoreifbetter="true" kind="nonaccessible" pattern="**/*"/>
 		</accessrules>
 	</classpathentry>
-	<classpathentry kind="lib" path="/Volumes/Beta/Downloads/lib/commons-collections-3.2.1.jar"/>
 	<classpathentry kind="lib" path="/Volumes/Beta/Downloads/lib/commons-configuration-1.6.jar"/>
 	<classpathentry kind="lib" path="/Volumes/Beta/Downloads/lib/commons-lang-2.5.jar"/>
 	<classpathentry kind="lib" path="/Volumes/Beta/Downloads/lib/commons-logging-1.1.1.jar"/>
@@ -60,9 +59,9 @@
 	<classpathentry kind="lib" path="/Volumes/Beta/Downloads/lib/org.eclipse.equinox.preferences_3.2.301.R35x_v20091117.jar"/>
 	<classpathentry kind="lib" path="/Volumes/Beta/Downloads/lib/org.eclipse.jdt.core_3.5.2.v_981_R35x.jar"/>
 	<classpathentry kind="lib" path="/Volumes/Beta/Downloads/lib/org.eclipse.osgi_3.5.2.R35x_v20100126.jar"/>
-	<classpathentry kind="lib" path="/br.ufrn.ppgsc.scenario.analyzer.libs/libs/hibernate_3.6.10/hibernate-jpa-2.0-api-1.0.1.Final.jar"/>
-	<classpathentry kind="lib" path="/br.ufrn.ppgsc.scenario.analyzer.libs/libs/hibernate_3.6.10/hibernate3.jar"/>
 	<classpathentry kind="lib" path="/br.ufrn.ppgsc.scenario.analyzer.libs/libs/postgresql-9.3-1102.jdbc41.jar"/>
 	<classpathentry kind="lib" path="/Volumes/Beta/Downloads/jgrapht-0.9.0/lib/jgrapht-ext-0.9.0-uber.jar"/>
+	<classpathentry kind="var" path="ECLIPSE_HOME/plugins/org.eclipse.jdt.ui_3.10.2.v20141014-1419.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.core.tests"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
