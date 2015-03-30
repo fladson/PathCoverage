@@ -20,14 +20,14 @@ public class Main {
 		RepositoryConnector repositoryConnector = new ConnectorFactory().getRepositoryConnector();
 		repositoryConnector.performSetup(githubConnector.getRepositoryLocalPath());
 		
-		System.out.println("-|Buscando métodos alterados do commit: nos arquivos...");
+		System.out.println("-|Buscando metodos alterados do commit: nos arquivos...");
 		List<String> arquivos_alterados = githubConnector.getFilesOfRevision(PropertiesUtil.getPropertieValueOf("connections", "SYSTEM_END_VERSION"));
 		
 		for (String string : arquivos_alterados) {
 			System.out.println(string);
 		}
 		
-		System.out.println("-|Recuperando dados dos métodos cobertos do banco de dados...");
+		System.out.println("-|Recuperando dados dos metodos cobertos do banco de dados...");
 		PostgreSQLJDBC db = new PostgreSQLJDBC();
 		List<Node> coveredMethods = db.getAllCoveredMethods();
 		
