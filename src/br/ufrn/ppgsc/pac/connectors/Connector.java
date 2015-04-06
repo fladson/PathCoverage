@@ -16,6 +16,8 @@ import java.util.List;
 public abstract class Connector {
 
 	protected String systemName;
+	protected String branch;
+	protected String pullRequests;
 	protected String startVersion;
 	protected String endVersion;
 
@@ -107,10 +109,28 @@ public abstract class Connector {
 		this.repositoryLocalPath = repositoryLocalPath;
 	}
 
+	public String getBranch() {
+		return branch;
+	}
+
+	public void setBranch(String branch) {
+		this.branch = branch;
+	}
+
+	public String getPullRequests() {
+		return pullRequests;
+	}
+
+	public void setPullRequests(String pullRequests) {
+		this.pullRequests = pullRequests;
+	}
+
 	@Override
 	public String toString() {
-		return "Connector [systemName=" + systemName + ", startVersion="
+		return "Connector [systemName=" + systemName + ", branch=" + branch
+				+ ", pullRequests=" + pullRequests + ", startVersion="
 				+ startVersion + ", endVersion=" + endVersion + ", url=" + url
-				+ ", user=" + user + ", password=" + password + "]";
+				+ ", user=" + user + ", password=" + password
+				+ ", repositoryLocalPath=" + repositoryLocalPath + "]";
 	}
 }

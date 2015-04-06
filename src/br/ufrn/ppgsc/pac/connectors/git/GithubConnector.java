@@ -98,16 +98,22 @@ public class GithubConnector extends Connector {
 		// return githubRepository;
 	}
 
-	public void cloneRepository(){
+	private void cloneRepository(){
+		// Clonando no mesmo diretório onde o projeto eclipse está presente 
 		this.repositoryLocalPath = System.getProperty("user.dir").replace("PathCoverage", this.systemName);
 		File file = new File(repositoryLocalPath);
 		if(!file.exists()){
-			System.out.println("Creating a local project: "+repositoryLocalPath);
+			System.out.println("Clonando repositório em: "+repositoryLocalPath);
 			new File(repositoryLocalPath).mkdir();
 			try {
+//				if(this.branch.isEmpty()){
+//					
+//				}
+				
 				Git repo = Git.cloneRepository()
 				.setURI(githubRepositoryService.getRepository(repository_id).getCloneUrl())
 				.setDirectory(file)
+				.setBranch(branch)
 				.call();
 				
 				if(repo.getRepository() == null)
@@ -127,7 +133,7 @@ public class GithubConnector extends Connector {
 			try {
 				org.eclipse.jgit.lib.Repository repository = builder.findGitDir(file).build();
 				PullResult call = new Git(repository).pull().call();
-				System.out.println("Pulled from the remote repository: " + call);
+				System.out.println("Repositorio atulizado localmente");
 			    repository.close();
 			} catch (IOException | GitAPIException e) {
 				e.printStackTrace();
@@ -176,6 +182,7 @@ public class GithubConnector extends Connector {
 		String command = so_prefix + "git blame -l " + startRev + ".." + endRev + " " + filename;
 		
 		try {
+			// filedir tem que ser formatado
 			Process p = Runtime.getRuntime().exec(command, null, new File(filedir));
 			BufferedReader bf = new BufferedReader(new InputStreamReader(p.getInputStream()));
 			

@@ -6,6 +6,7 @@ import java.util.Properties;
 
 import br.ufrn.ppgsc.pac.connectors.git.GitConnector;
 import br.ufrn.ppgsc.pac.connectors.git.GithubConnector;
+import br.ufrn.ppgsc.pac.util.PropertiesUtil;
 
 /**
  * UNIVERSIDADE FEDERAL DO RIO GRANDE DO NORTE - UFRN
@@ -23,44 +24,32 @@ import br.ufrn.ppgsc.pac.connectors.git.GithubConnector;
  */
 public class ConnectorFactory {
 	
-	public Connector getSystemConnector(String connectorName) throws Exception{
+	public Connector getSystemConnector(String connectorName, String side) throws Exception{
 			
-		Properties propConnector = getProperties("connectors");
-		Properties propConnections = getProperties("connections");
+		Properties propConnector = PropertiesUtil.getPropertieFile("connectors");
+		Properties propConnections = PropertiesUtil.getPropertieFile("connections");
 		Connector connector = (Connector) Class.forName(propConnector.getProperty(connectorName)).newInstance();
 	
 		if(connector instanceof GithubConnector){
 			GithubConnector githubConnector = (GithubConnector) connector;
-			githubConnector.setUrl(propConnections.getProperty("SYSTEM_URL"));
-			githubConnector.setUser(propConnections.getProperty("SYSTEM_USER"));
-			githubConnector.setPassword(propConnections.getProperty("SYSTEM_PASSWORD"));
-			githubConnector.setSystemName(propConnections.getProperty("SYSTEM_NAME"));
-			githubConnector.setStartVersion(propConnections.getProperty("SYSTEM_START_VERSION"));
-			githubConnector.setEndVersion(propConnections.getProperty("SYSTEM_END_VERSION"));
+			githubConnector.setUrl(propConnections.getProperty(side + "_SYSTEM_URL"));
+			githubConnector.setUser(propConnections.getProperty(side + "_SYSTEM_USER"));
+			githubConnector.setPassword(propConnections.getProperty(side + "_SYSTEM_PASSWORD"));
+			githubConnector.setSystemName(propConnections.getProperty(side + "_SYSTEM_NAME"));
+			githubConnector.setStartVersion(propConnections.getProperty(side + "_SYSTEM_START_VERSION"));
+			githubConnector.setEndVersion(propConnections.getProperty(side + "_SYSTEM_END_VERSION"));
+			githubConnector.setBranch(propConnections.getProperty(side + "_SYSTEM_BRANCH"));
+			githubConnector.setPullRequests(propConnections.getProperty(side + "_SYSTEM_PULL_REQUESTS"));
 	    	githubConnector.performSetup();
 		}
 		return connector;
 	}
 	
 	public RepositoryConnector getRepositoryConnector() throws Exception{
-		
-		Properties propConfig = getProperties("config");
+		Properties propConfig = PropertiesUtil.getPropertieFile("config");
 		String connectorName = propConfig.getProperty("REPOSITORY_CONNECTOR");
-		Properties propConnector = getProperties("connectors");
+		Properties propConnector = PropertiesUtil.getPropertieFile("connectors");
 		RepositoryConnector connector = (RepositoryConnector) Class.forName(propConnector.getProperty(connectorName)).newInstance();
-//		if(connector instanceof GitConnector){
-//			GitConnector gitConnector = (GitConnector) connector;
-//			gitConnector.performSetup();
-//		}
-		//Nao posso fazer o setup aqui pois nao tenho o path do repositorio clonado
 		return connector;
-	}
-	
-	public static Properties getProperties(String filename) throws IOException {
-		Properties props = new Properties();
-		FileInputStream file = new FileInputStream(System.getProperty("user.dir") + "/src/properties/" + filename + ".properties");
-		props.load(file);
-		file.close();
-		return props;
 	}
 }
