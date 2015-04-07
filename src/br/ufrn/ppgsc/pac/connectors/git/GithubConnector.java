@@ -13,6 +13,8 @@
 package br.ufrn.ppgsc.pac.connectors.git;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -25,19 +27,27 @@ import java.util.Date;
 import java.util.List;
 import java.util.Scanner;
 
+import org.apache.commons.io.IOUtils;
+import org.eclipse.egit.github.core.Commit;
 import org.eclipse.egit.github.core.CommitFile;
 import org.eclipse.egit.github.core.IRepositoryIdProvider;
-import org.eclipse.egit.github.core.Repository;
 import org.eclipse.egit.github.core.RepositoryCommit;
 import org.eclipse.egit.github.core.RepositoryId;
 import org.eclipse.egit.github.core.client.GitHubClient;
 import org.eclipse.egit.github.core.service.CommitService;
 import org.eclipse.egit.github.core.service.RepositoryService;
+import org.eclipse.jgit.api.BlameCommand;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.PullResult;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.api.errors.NoHeadException;
+import org.eclipse.jgit.blame.BlameResult;
+import org.eclipse.jgit.errors.AmbiguousObjectException;
+import org.eclipse.jgit.errors.IncorrectObjectTypeException;
+import org.eclipse.jgit.errors.RevisionSyntaxException;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.ObjectLoader;
+import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
@@ -66,21 +76,19 @@ public class GithubConnector extends Connector {
 
 	private GitHubClient githubClientManager;
 	private RepositoryService githubRepositoryService;
-	private Repository githubRepository;
+	private org.eclipse.egit.github.core.Repository githubRepository;
 	private IRepositoryIdProvider repository_id;
 	private CommitService commitService;
 	private String repositoryPath;
-	
-	private Iterable<RevCommit> commitsInRange;
-	private List<RevCommit> commitsOnRange;
-	
 	private List<String> changedFiles;
 	private List<UpdatedLine> changedLines;
 	private StringBuilder sourceCode;
+	private Repository repository;
+	private List<String> commitsOnRangeString;
 	
-	private String startRev;
-	private String endRev;
-	private String filedir;
+//	private String startRev;
+//	private String endRev;
+//	private String filedir;
 
 	@Override
 	public void performSetup() {
@@ -99,23 +107,27 @@ public class GithubConnector extends Connector {
 	}
 
 	private void cloneRepository(){
-		// Clonando no mesmo diretório onde o projeto eclipse está presente 
+		// Clonando no mesmo diretorio onde o projeto eclipse esta presente 
 		this.repositoryLocalPath = System.getProperty("user.dir").replace("PathCoverage", this.systemName);
 		File file = new File(repositoryLocalPath);
 		if(!file.exists()){
-			System.out.println("Clonando repositório em: "+repositoryLocalPath);
+			System.out.println("Clonando repositorio em: "+repositoryLocalPath);
 			new File(repositoryLocalPath).mkdir();
 			try {
-//				if(this.branch.isEmpty()){
-//					
-//				}
-				
-				Git repo = Git.cloneRepository()
-				.setURI(githubRepositoryService.getRepository(repository_id).getCloneUrl())
-				.setDirectory(file)
-				.setBranch(branch)
-				.call();
-				
+				Git repo = null;
+				if(this.branch.isEmpty()){
+					// Se nao vier especificado o branch, o master eh o padrao
+					repo = Git.cloneRepository()
+					.setURI(githubRepositoryService.getRepository(repository_id).getCloneUrl())
+					.setDirectory(file)
+					.call();
+				}else{
+					repo = Git.cloneRepository()
+					.setURI(githubRepositoryService.getRepository(repository_id).getCloneUrl())
+					.setDirectory(file)
+					.setBranch(branch)
+					.call();
+				}				
 				if(repo.getRepository() == null)
 					System.out.println("Erro no clone do repositorio");
 				else{
@@ -128,10 +140,9 @@ public class GithubConnector extends Connector {
 			}
 		}else{
 			System.out.println("Repositorio ja foi clonado, atualizando localmente...");
-			// Tentar fazer o pull aqui
 			FileRepositoryBuilder builder = new FileRepositoryBuilder();
 			try {
-				org.eclipse.jgit.lib.Repository repository = builder.findGitDir(file).build();
+				repository =  builder.findGitDir(file).build();
 				PullResult call = new Git(repository).pull().call();
 				System.out.println("Repositorio atulizado localmente");
 			    repository.close();
@@ -141,35 +152,56 @@ public class GithubConnector extends Connector {
 		}
 	}
 	
-	public List<String> getMethodsChangedOfRevision(String revision){
-		changedFiles = this.getFilesOfRevision(revision);
-		if(!changedFiles.isEmpty()){
-			for (String string : changedFiles) {
-				// Pegando mudancas de cada arquivo alterado no commit
-				changedLines = new ArrayList<UpdatedLine>();
-				sourceCode = new StringBuilder();
-				
+	public void getFilesChanged() throws Exception{
+		try {
+			this.commitsOnRangeString = this.getCommitsInRange();
+			for (String commit : commitsOnRangeString) {
+				List<String> changedFilesInRevision = getFilesOfRevision(commit);
+				System.out.println("Arquivos modificados em: " + commit.substring(0, 7));
+				this.changedFiles = new ArrayList<String>();
+				for (String file : changedFilesInRevision) {
+					System.out.println("\t" + file);
+					changedFiles.add(file);
+					calculateChangedLines(commit, file);
+				}
 			}
-			
-		}else{
-			System.out.println("Lista de arquivos modificados vazia");
+		} catch (IOException | GitAPIException e) {
+			e.printStackTrace();
 		}
-		
-		return null;
+	}
+
+	private List<String> getCommitsInRange() throws IOException, NoHeadException, GitAPIException{
+		commitsOnRangeString = new ArrayList<String>();
+		if(this.startVersion.equals(this.endVersion)){
+			commitsOnRangeString.add(this.startVersion);
+		}else{
+			ObjectId start = repository.resolve(this.startVersion);
+			ObjectId end = repository.resolve(this.endVersion);
+			Iterable<RevCommit> commitsInRange = new Git(repository).log().addRange(start,end).call();	
+			for (RevCommit revCommit : commitsInRange) {
+				commitsOnRangeString.add(revCommit.name());
+			}
+			commitsOnRangeString.add(this.startVersion);
+		}
+		return commitsOnRangeString;
 	}
 	
-	/*
-	 * TODO Remover arquivos nao java dessa lista antes de repassar
-	 */
-	public List<String> getFilesOfRevision(String Revision) {
+	private List<String> getFilesOfRevision(String revision) {
 		List<String> commitFilesString = new ArrayList<String>();
 		RepositoryCommit lastCommit;
 		try {
-			lastCommit = commitService.getCommit(repository_id, Revision);
+			if(revision.isEmpty()){
+				// pegar ultimo commit do branch atual
+				String last_revision = commitService.getCommits(repository_id).get(0).getSha();
+				lastCommit = commitService.getCommit(repository_id,last_revision);
+			}else{
+				lastCommit = commitService.getCommit(repository_id, revision);
+			}
 			List<CommitFile> commitFiles = lastCommit.getFiles();
-			
 			for (CommitFile commitFile : commitFiles) {
-				commitFilesString.add(commitFile.getFilename().toString());
+				String fileName = commitFile.getFilename().toString();
+				if(fileName.contains(".java"))
+					commitFilesString.add(fileName);
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -177,13 +209,13 @@ public class GithubConnector extends Connector {
 		return commitFilesString;
 	}
 	
-	public void calculateChangedLines(String filename) {
-		String so_prefix = "cd " + repositoryPath;
-		String command = so_prefix + "git blame -l " + startRev + ".." + endRev + " " + filename;
-		
+	
+	public void calculateChangedLines(String commit, String filename) {
+		String so_prefix = "cmd /c ";
+		String command = so_prefix + "git blame -l " + commit + ".." + commit + " " + filename;
+		String path = this.repositoryLocalPath.replace('\\', '/')+"/";
 		try {
-			// filedir tem que ser formatado
-			Process p = Runtime.getRuntime().exec(command, null, new File(filedir));
+			Process p = Runtime.getRuntime().exec(command, null, new File(path));
 			BufferedReader bf = new BufferedReader(new InputStreamReader(p.getInputStream()));
 			
 			String line = null;
@@ -200,7 +232,7 @@ public class GithubConnector extends Connector {
 			System.exit(0);
 		}
 	}
-	
+
 	private UpdatedLine handleLine(String gitblameline) throws IOException {
 		Scanner in = new Scanner(gitblameline);
 		
@@ -241,8 +273,9 @@ public class GithubConnector extends Connector {
 			author_name += (i == 0 ? "" : " ") + tokens.get(i);
 		
 		sourceCode.append(source_line + System.lineSeparator());
-		
+			
 		return new UpdatedLine(commit_date, commit, author_name, source_line, line_number);
 
 	}
+
 }

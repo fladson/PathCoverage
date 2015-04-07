@@ -66,14 +66,6 @@ public class MethodLimitBuilder {
 		return Collections.unmodifiableCollection(result.values());
 	}
 	
-	/**
-		 Isso é apenas uma simplificação, para evitar pelo menos uma parte dos casos.
-		 Um comentário como esse não será detectado, por exemplo, pois não inicia nem
-		 com / nem com *
-		 Isso é preciso porque o visitor considera este tipo de comentário como parte da
-		 declaração do método.
-		 TODO: Ver uma solução mais precisa para essa situação.
-	*/
 	private boolean isComment(String line) {
 		String line_trim = line.trim();
 		return line_trim.startsWith("/") || line_trim.startsWith("*");

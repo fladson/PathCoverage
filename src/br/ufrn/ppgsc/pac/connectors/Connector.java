@@ -45,11 +45,11 @@ public abstract class Connector {
 	public void performRun() {
 
 	}
-	public List<String> getFilesOfRevision(String Revision){
+	private List<String> getFilesOfRevision(String Revision){
 		return null;
 	}
 	
-	public List<String> getMethodsChangedOfRevision(String Revision){
+	public List<String> getMethodsChangedOfRevision(String Revision) throws Exception{
 		return null;
 	}
 
@@ -132,5 +132,8 @@ public abstract class Connector {
 				+ startVersion + ", endVersion=" + endVersion + ", url=" + url
 				+ ", user=" + user + ", password=" + password
 				+ ", repositoryLocalPath=" + repositoryLocalPath + "]";
+	}
+
+	public void getFilesChanged() throws Exception {
 	}
 }
