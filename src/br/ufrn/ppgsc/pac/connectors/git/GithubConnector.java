@@ -24,6 +24,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Scanner;
 
@@ -56,7 +57,9 @@ import org.eclipse.jgit.treewalk.TreeWalk;
 import org.eclipse.jgit.treewalk.filter.PathFilter;
 
 import br.ufrn.ppgsc.pac.connectors.Connector;
+import br.ufrn.ppgsc.pac.jdt.MethodLimitBuilder;
 import br.ufrn.ppgsc.pac.model.UpdatedLine;
+import br.ufrn.ppgsc.pac.model.UpdatedMethod;
 
 /**
  * UNIVERSIDADE FEDERAL DO RIO GRANDE DO NORTE - UFRN
@@ -81,6 +84,7 @@ public class GithubConnector extends Connector {
 	private CommitService commitService;
 	private String repositoryPath;
 	private List<String> changedFiles;
+	private List<Collection<UpdatedMethod>> changedMethods;
 	private List<UpdatedLine> changedLines;
 	private StringBuilder sourceCode;
 	private Repository repository;
@@ -155,16 +159,28 @@ public class GithubConnector extends Connector {
 	public void getFilesChanged() throws Exception{
 		try {
 			this.commitsOnRangeString = this.getCommitsInRange();
+			changedMethods = new ArrayList<Collection<UpdatedMethod>>();
 			for (String commit : commitsOnRangeString) {
 				List<String> changedFilesInRevision = getFilesOfRevision(commit);
 				System.out.println("Arquivos modificados em: " + commit.substring(0, 7));
 				this.changedFiles = new ArrayList<String>();
 				for (String file : changedFilesInRevision) {
+					changedLines = new ArrayList<UpdatedLine>();
+					sourceCode = new StringBuilder();
+					
 					System.out.println("\t" + file);
 					changedFiles.add(file);
 					calculateChangedLines(commit, file);
+					MethodLimitBuilder builder = new MethodLimitBuilder(sourceCode.toString());
+					changedMethods.add(builder.filterChangedMethods(changedLines));
 				}
 			}
+			for (Collection<UpdatedMethod> collection : changedMethods) {
+				for(UpdatedMethod method : collection ){
+					System.out.println(method.getMethodLimit().getSignature());
+				}
+			}
+			
 		} catch (IOException | GitAPIException e) {
 			e.printStackTrace();
 		}
@@ -212,7 +228,7 @@ public class GithubConnector extends Connector {
 	
 	public void calculateChangedLines(String commit, String filename) {
 		String so_prefix = "cmd /c ";
-		String command = so_prefix + "git blame -l " + commit + ".." + commit + " " + filename;
+		String command =  "git blame -l " + commit + ".." + commit + " " + filename;
 		String path = this.repositoryLocalPath.replace('\\', '/')+"/";
 		try {
 			Process p = Runtime.getRuntime().exec(command, null, new File(path));

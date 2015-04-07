@@ -21,23 +21,22 @@ public class Main {
 //		RepositoryConnector repositoryConnector = new ConnectorFactory().getRepositoryConnector();
 //		repositoryConnector.performSetup(githubTargetConnector.getRepositoryLocalPath());
 		
-//		System.out.println("-|Buscando metodos alterados do commit: nos arquivos...");
+		System.out.println("-|Buscando metodos alterados do commit: nos arquivos...");
 		githubSourceConnector.getFilesChanged();
 		
-		githubTargetConnector.getMethodsChangedOfRevision("");
 		
-		System.out.println("-|Recuperando dados dos metodos cobertos do banco de dados...");
-		PostgreSQLJDBC db = new PostgreSQLJDBC();
-		List<Node> coveredMethods = db.getAllCoveredMethods();
+//		System.out.println("-|Recuperando dados dos metodos cobertos do banco de dados...");
+//		PostgreSQLJDBC db = new PostgreSQLJDBC();
+//		List<Node> coveredMethods = db.getAllCoveredMethods();
 		
 //		for (Node node : coveredMethods) {
 //			System.out.println(node.toString());
 //		}
 		
-		System.out.println("-|Criando grafo de chamadas com o WALA...");
-		CallGraphWALA cg = new CallGraphWALA();
+//		System.out.println("-|Criando grafo de chamadas com o WALA...");
+//		CallGraphWALA cg = new CallGraphWALA();
 //		cg.init("C:/Users/Fladson Gomes/Desktop/workspace_luna/teste"); 
-		cg.init(githubTargetConnector.getRepositoryLocalPath());
+//		cg.init(githubTargetConnector.getRepositoryLocalPath());
 		
 		
 
