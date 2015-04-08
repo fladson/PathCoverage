@@ -18,11 +18,11 @@ public class Main {
 		System.out.println("-|Baixando projeto do Github...");
 		Connector githubTargetConnector = new ConnectorFactory().getSystemConnector("GITHUB", "TARGET");
 		Connector githubSourceConnector = new ConnectorFactory().getSystemConnector("GITHUB", "SOURCE");
-//		RepositoryConnector repositoryConnector = new ConnectorFactory().getRepositoryConnector();
-//		repositoryConnector.performSetup(githubTargetConnector.getRepositoryLocalPath());
+		RepositoryConnector repositoryConnector = new ConnectorFactory().getRepositoryConnector();
+		repositoryConnector.performSetup(githubTargetConnector.getRepositoryLocalPath());
 		
 		System.out.println("-|Buscando metodos alterados do commit: nos arquivos...");
-//		githubSourceConnector.getFilesChanged();
+		githubSourceConnector.getFilesChanged();
 		
 		
 //		System.out.println("-|Recuperando dados dos metodos cobertos do banco de dados...");
@@ -33,10 +33,11 @@ public class Main {
 //			System.out.println(node.toString());
 //		}
 		
-		System.out.println("-|Criando grafo de chamadas com o WALA...");
-		CallGraphWALA cg = new CallGraphWALA();
-//		cg.init("C:/Users/Fladson Gomes/Desktop/workspace_luna/teste"); 
-		cg.init(githubTargetConnector.getRepositoryLocalPath());
+//		System.out.println("-|Criando grafo de chamadas com o WALA...");
+//		CallGraphWALA cg = new CallGraphWALA();
+//		cg.init("C:/Users/fladson/Desktop/workspace_luna/SamplePathCoverage"); 
+//		cg.init("C:/Users/fladson/git/source");
+//		cg.init(githubTargetConnector.getRepositoryLocalPath());
 		
 		
 

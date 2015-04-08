@@ -1,6 +1,7 @@
 package br.ufrn.ppgsc.pac.wala;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -68,6 +69,8 @@ public class CallGraphWALA {
 	private AnalysisScope analysisScope = null;
 	private ClassHierarchy classHierarchy = null;
 	private final static String PDF_FILE = "cg.pdf";
+//	private List<String> callEntries = null;
+	FileWriter out = null;
 
 	public Iterable<Entrypoint> makeLibraryEntrypoints(AnalysisScope scope,
 			IClassHierarchy cha) {
@@ -138,18 +141,11 @@ public class CallGraphWALA {
 
 	public void loadAnalysisScope(String application_path) throws IOException {
 		// this.analysisScope = AnalysisScope.createJavaAnalysisScope();
-		this.analysisScope = AnalysisScopeReader.makeJavaBinaryAnalysisScope(
-				application_path, new File(
-						CallGraphTestUtil.REGRESSION_EXCLUSIONS));
-		analysisScope
-				.addToScope(
-						ClassLoaderReference.Primordial,
-						new JarFile(PropertiesUtil.getPropertieValueOf(
-								"config", "PRIMORDIAL_LIB")));
+		this.analysisScope = AnalysisScopeReader.makeJavaBinaryAnalysisScope(application_path, new File(CallGraphTestUtil.REGRESSION_EXCLUSIONS));
+		analysisScope.addToScope(ClassLoaderReference.Primordial,new JarFile(PropertiesUtil.getPropertieValueOf("config", "PRIMORDIAL_LIB")));
 		// analysisScope.addToScope(ClassLoaderReference.Primordial, new
 		// JarFile("C:/Users/Fladson Gomes/Downloads/libs/jsdg-stubs-jre1.5.jar"));
-		ClassLoaderReference loader = analysisScope
-				.getLoader(AnalysisScope.APPLICATION);
+		ClassLoaderReference loader = analysisScope.getLoader(AnalysisScope.APPLICATION);
 		addClassPathToScope(application_path, analysisScope, loader);
 	}
 
@@ -163,12 +159,11 @@ public class CallGraphWALA {
 			try {
 				loadAnalysisScope(application);
 				loadClassHierarchy();
-				// printMethods();
+//				 printMethods();
 
 				// insere o main como entryPoint.
 				Iterable<Entrypoint> entrypoints = null;
-				entrypoints = Util.makeMainEntrypoints(this.analysisScope,
-						this.classHierarchy);
+				entrypoints = Util.makeMainEntrypoints(this.analysisScope,this.classHierarchy);
 				if (!entrypoints.iterator().hasNext()) {
 					// a aplicacao nao possui main, tentando pegar entrypoint
 					// TODO Ver se essa e a melhor opcao
@@ -188,6 +183,10 @@ public class CallGraphWALA {
 
 				builder = Util.makeZeroOneCFABuilder(options,
 						new AnalysisCache(), cha, scope);
+				if(!entrypoints.iterator().hasNext()){
+					System.out.println("Não foi possível gerar um entrypoint para o sistema");
+					return;
+				}
 				this.cg = builder.makeCallGraph(options, null);
 				System.out.println((new Date()).toString()
 						+ " - CallGraph created.");
@@ -195,13 +194,25 @@ public class CallGraphWALA {
 
 				// retirando metodos do Java core e deixando apenas os metodos
 				// da aplicao
-				graph_pruned = pruneForAppLoader(cg);
+				
+				out = new FileWriter("callEntries.txt");
+				
+				Collection<CGNode> entries = cg.getEntrypointNodes();	    
+				for ( Iterator<CGNode> i = entries.iterator() ; i.hasNext() ;)
+				{			
+					CGNode entrypoint = i.next();			
+					printCallGraphNode(cg, entrypoint, 0);
+				}
+				
+				out.close();
+				
+//				graph_pruned = pruneForAppLoader(cg);
 				
 				
 //				printNodes(cg);
 //				treeSearch(head, graph);
-				preOrder(graph_pruned);
-				System.out.println(GraphPrint.genericToString(graph_pruned));
+//				preOrder(graph_pruned);
+//				System.out.println(GraphPrint.genericToString(graph_pruned));
 				
 				// formatando as assinaturas dos mÃ©todos
 //				this.parsePrunedGraphToStandardMethodSignature(graph_pruned);
@@ -221,50 +232,6 @@ public class CallGraphWALA {
 		}
 	}
 	
-	public void preOrder(Graph<CGNode> graph){ 
-		for (CGNode currentNode : graph) {
-			Stack<CGNode> left_right = new Stack<CGNode>();
-			for (Iterator<CGNode> sucs = graph.getSuccNodes(currentNode); sucs.hasNext();) {
-				left_right.push(sucs.next());
-			}
-			prepPreOrder(currentNode, left_right.get(0), left_right.get(1));	
-		}
-	}
-	
-	private void prepPreOrder(CGNode node, CGNode left, CGNode right){
-		 Stack<CGNode> parentStack = new Stack<CGNode>();
-		 while(!parentStack.isEmpty() || node != null){
-			 if(node != null){
-				 System.out.println(node.getMethod() + " > ");
-				 if(right != null)
-					 parentStack.push(right);
-				 node = left;
-			 }else{
-				 node = parentStack.pop();
-			 }
-		 }
-	}
-	
-	public void treeSearch(CGNode head, Graph<CGNode> graph) {
-	    Stack<CGNode> preStack = new Stack<CGNode>();
-	    Stack<CGNode> postStack = new Stack<CGNode>();
-	    preStack.add(head);
-	    while (!preStack.isEmpty()) {
-	    	CGNode currentNode = preStack.pop();
-	        // do whatever i want to on current node.
-	    	System.out.println( getStandartMethodSignature(currentNode.getMethod()));
-	        postStack.add(currentNode);
-	        Set<CGNode> reachableNodes = DFS.getReachableNodes(graph, Collections.singleton(currentNode));
-	        for (Iterator<CGNode> it = reachableNodes.iterator(); it.hasNext();) {
-	        	 preStack.add(it.next());
-			}
-	    }
-
-	    while (!postStack.isEmpty()) {
-	    	CGNode vertex = postStack.pop();
-	    }
-
-	}
 
 	/**
 	 * Classe que representa os metogos da aplicao para filtragem,
@@ -296,20 +263,23 @@ public class CallGraphWALA {
 	}
 	
 	// Print retirado da ferramenta de Demostenes
-	private void printCallGraphNode(CallGraph cg, CGNode currNode, int level) {
+	
+	private void printCallGraphNode(CallGraph cg, CGNode currNode, int level) throws IOException {
 		if (getAtomLoaderReference(currNode) != AnalysisScope.PRIMORDIAL) {
 			printLevelTabs(level);
 			System.out.println(currNode.getMethod().getSignature());
-			for (Iterator<CGNode> preds = cg.getPredNodes(currNode); preds
-					.hasNext();) {
+			out.write(getStandartMethodSignature(currNode.getMethod())+"\n");
+			for (Iterator<CGNode> preds = cg.getPredNodes(currNode); preds.hasNext();) {
 				printCallGraphNode(cg, preds.next(), level + 1);
 			}
 		}
 	}
 
-	private void printLevelTabs(int level) {
-		for (int i = 0; i < level; i++)
+	private void printLevelTabs(int level) throws IOException {
+		for (int i = 0; i < level; i++){
 			System.out.print("\t");
+			out.write("\t");
+		}
 	}
 
 	private Atom getAtomLoaderReference(CGNode node) {
@@ -317,11 +287,6 @@ public class CallGraphWALA {
 				.getClassLoader().getName();
 	}
 
-	private void parseGraphtoListOfCalls(Graph<CGNode> gr) {
-		for (Iterator<CGNode> it = gr.iterator(); it.hasNext();) {
-			
-		}
-	}
 	
 	// Print retirado da ferramenta de Felipe
 	public void printNodes(CallGraph cg) {
@@ -335,9 +300,11 @@ public class CallGraphWALA {
 			return;
 
 		if (visited.contains(root)) {
+//			callEntries.add(str + "[*]" + getStandartMethodSignature(root.getMethod()));
 			System.out.println(str + "[*]" + getStandartMethodSignature(root.getMethod()));
 			return;
 		} else{
+//			callEntries.add(str + getStandartMethodSignature(root.getMethod()));
 			System.out.println(str + getStandartMethodSignature(root.getMethod()));
 		}
 

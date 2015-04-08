@@ -171,6 +171,7 @@ public class GithubConnector extends Connector {
 					System.out.println("\t" + file);
 					changedFiles.add(file);
 					calculateChangedLines(commit, file);
+					
 					MethodLimitBuilder builder = new MethodLimitBuilder(sourceCode.toString());
 					changedMethods.add(builder.filterChangedMethods(changedLines));
 				}
@@ -226,10 +227,9 @@ public class GithubConnector extends Connector {
 	}
 	
 	
-	public void calculateChangedLines(String commit, String filename) {
+	public void calculateChangedLines(String commit, String filename) throws Exception {
 		String so_prefix = "cmd /c ";
-		String command =  so_prefix +  "git blame -l " + commit + ".." + commit + " " + filename;
-//		String path = this.repositoryLocalPath.replace('\\', '/');
+		String command =  so_prefix +  "git blame -l " + getPreviousRevision(commit) + ".." + commit + " " + filename;
 		try {
 			Process p = Runtime.getRuntime().exec(command, null, new File(this.repositoryLocalPath));
 			BufferedReader bf = new BufferedReader(new InputStreamReader(p.getInputStream()));
@@ -289,9 +289,22 @@ public class GithubConnector extends Connector {
 			author_name += (i == 0 ? "" : " ") + tokens.get(i);
 		
 		sourceCode.append(source_line + System.lineSeparator());
-			
-		return new UpdatedLine(commit_date, commit, author_name, source_line, line_number);
-
+		
+		if (!commit.startsWith("^")) {
+			return new UpdatedLine(commit_date, commit, source_line, author_name, line_number);
+		}
+		return null;
+	}
+	
+	public String getPreviousRevision(String actualRevision)
+			throws Exception {
+		
+		RepositoryCommit commit = commitService.getCommit(repository_id, actualRevision);
+		//System.out.print("Pais: ");
+//		for (Commit p : commit.getParents()) {
+//			System.out.println(p.getSha()+ " - ");
+//		}
+		return commit.getParents().get(0).getSha();
 	}
 
 }
