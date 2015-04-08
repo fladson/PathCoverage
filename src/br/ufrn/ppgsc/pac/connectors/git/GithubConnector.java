@@ -228,10 +228,10 @@ public class GithubConnector extends Connector {
 	
 	public void calculateChangedLines(String commit, String filename) {
 		String so_prefix = "cmd /c ";
-		String command =  "git blame -l " + commit + ".." + commit + " " + filename;
-		String path = this.repositoryLocalPath.replace('\\', '/')+"/";
+		String command =  so_prefix +  "git blame -l " + commit + ".." + commit + " " + filename;
+//		String path = this.repositoryLocalPath.replace('\\', '/');
 		try {
-			Process p = Runtime.getRuntime().exec(command, null, new File(path));
+			Process p = Runtime.getRuntime().exec(command, null, new File(this.repositoryLocalPath));
 			BufferedReader bf = new BufferedReader(new InputStreamReader(p.getInputStream()));
 			
 			String line = null;

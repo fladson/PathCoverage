@@ -171,42 +171,18 @@ public class CallGraphWALA {
 						this.classHierarchy);
 				if (!entrypoints.iterator().hasNext()) {
 					// a aplicacao nao possui main, tentando pegar entrypoint
-					// dos testes
-					// O WALA nao suporta o Junit 4, ficando inviavel pegar o
-					// entrypoint dos testes visto que as anotacoes sao
-					// necessarias
-					// para rodar o framework de Felipe
-					// entrypoints = JUnitEntryPoints.make(classHierarchy);
-
-					// TODO Ver se essa é a melhor opção
+					// TODO Ver se essa e a melhor opcao
 					entrypoints = makeLibraryEntrypoints(analysisScope,
 							classHierarchy);
 				}
-//				System.out.println((new Date()).toString()
-//						+ " - EntryPoints created.");
-				// System.out.println("============= Entry points ================");
-				//
-				// Iterator<Entrypoint> it_entrypoints = entrypoints.iterator();
-				// while (it_entrypoints.hasNext()) {
-				// System.out.println(it_entrypoints.next());
-				// }
-				// System.out.println("===========================================");
 
 				AnalysisOptions options = new AnalysisOptions(
 						this.analysisScope, entrypoints);
 				// AnalysisCache cache = new AnalysisCache();
-
-				/**
-				 * mais informa��es:
-				 * http://wala.sourceforge.net/wiki/index.php/UserGuide
-				 * :PointerAnalysis#Improving_Scalability
-				 */
 				options.setReflectionOptions(AnalysisOptions.ReflectionOptions.FULL);
 
 				SSAPropagationCallGraphBuilder builder = null;
 
-				// if(this.loader.isZeroCFA()){ // configura��o da an�lise
-				// 0-CFA.
 				IClassHierarchy cha = this.classHierarchy;
 				AnalysisScope scope = this.analysisScope;
 
@@ -217,44 +193,56 @@ public class CallGraphWALA {
 						+ " - CallGraph created.");
 				// System.out.println(CallGraphStats.getStats(cg));
 
-				// imprime todas as ramifica��es a partir dos entries points at�
-				// um cgnode primordial.
-				// Collection<CGNode> entries = cg.getEntrypointNodes();
-				// for (Iterator<CGNode> i = entries.iterator(); i.hasNext();) {
-				// CGNode entrypoint = i.next();
-				// printCallGraphNode(cg, entrypoint, 0);
-				// }
-
-				// retirando métodos do Java core e deixando apenas os métodos
-				// da aplicação
+				// retirando metodos do Java core e deixando apenas os metodos
+				// da aplicao
 				graph_pruned = pruneForAppLoader(cg);
 				
 				
 //				printNodes(cg);
 //				treeSearch(head, graph);
+				preOrder(graph_pruned);
 				System.out.println(GraphPrint.genericToString(graph_pruned));
+				
 				// formatando as assinaturas dos métodos
 //				this.parsePrunedGraphToStandardMethodSignature(graph_pruned);
 				// System.out.println("Graph pruned edges: " +
 				// GraphUtil.countEdges(g));
-				String pdfFile = "/Volumes/Beta/Mestrado/workspace_luna"
-						+ File.separatorChar + PDF_FILE;
-				String dotExe = "/usr/local/bin/dot";
-				DotUtil.dotify(graph_pruned, null, PDFTypeHierarchy.DOT_FILE,
-						pdfFile, dotExe);
-				System.out.println("Call Graph pruned at: " + pdfFile);
-				// String gvExe =
-				// "/Applications/Preview.app/Contents/MacOS/Preview";
-				// PDFViewUtil.launchPDFView(pdfFile, gvExe);
 				
-//				PointerAnalysis<InstanceKey> pa = builder.getPointerAnalysis();
-//			    new WalaViewer(cg, pa);
-				
+//				String pdfFile = "/Volumes/Beta/Mestrado/workspace_luna"
+//						+ File.separatorChar + PDF_FILE;
+//				String dotExe = "/usr/local/bin/dot";
+//				DotUtil.dotify(graph_pruned, null, PDFTypeHierarchy.DOT_FILE,
+//						pdfFile, dotExe);
+//				System.out.println("Call Graph pruned at: " + pdfFile);
 
 			} catch (IOException | WalaException | IllegalArgumentException | CallGraphBuilderCancelException e) {
 				e.printStackTrace();
 			}
 		}
+	}
+	
+	public void preOrder(Graph<CGNode> graph){ 
+		for (CGNode currentNode : graph) {
+			Stack<CGNode> left_right = new Stack<CGNode>();
+			for (Iterator<CGNode> sucs = graph.getSuccNodes(currentNode); sucs.hasNext();) {
+				left_right.push(sucs.next());
+			}
+			prepPreOrder(currentNode, left_right.get(0), left_right.get(1));	
+		}
+	}
+	
+	private void prepPreOrder(CGNode node, CGNode left, CGNode right){
+		 Stack<CGNode> parentStack = new Stack<CGNode>();
+		 while(!parentStack.isEmpty() || node != null){
+			 if(node != null){
+				 System.out.println(node.getMethod() + " > ");
+				 if(right != null)
+					 parentStack.push(right);
+				 node = left;
+			 }else{
+				 node = parentStack.pop();
+			 }
+		 }
 	}
 	
 	public void treeSearch(CGNode head, Graph<CGNode> graph) {
@@ -279,8 +267,8 @@ public class CallGraphWALA {
 	}
 
 	/**
-	 * Classe que representa os métogos da aplicação para filtragem Retirado de
-	 * PDFCallGraph.java
+	 * Classe que representa os metogos da aplicao para filtragem,
+	 * Retirado de PDFCallGraph.java
 	 * 
 	 * @author fladson
 	 *
@@ -306,7 +294,8 @@ public class CallGraphWALA {
 			throws WalaException {
 		return PDFTypeHierarchy.pruneGraph(g, new ApplicationLoaderFilter());
 	}
-	// Print retirado da ferramenta de Demóstenes
+	
+	// Print retirado da ferramenta de Demostenes
 	private void printCallGraphNode(CallGraph cg, CGNode currNode, int level) {
 		if (getAtomLoaderReference(currNode) != AnalysisScope.PRIMORDIAL) {
 			printLevelTabs(level);
@@ -334,17 +323,10 @@ public class CallGraphWALA {
 		}
 	}
 	
-	
-//	List<String> calls = null;
-//	String call = "";
-//	
 	// Print retirado da ferramenta de Felipe
 	public void printNodes(CallGraph cg) {
-//		calls = new ArrayList<String>();
 		for (Iterator<CGNode> it = cg.getSuccNodes(cg.getFakeRootNode()); it.hasNext();)
 			printNodes(cg, it.next(), new HashSet<CGNode>(), "");
-		
-//		System.out.println(calls.size());
 	}
 	
 	// Print retirado da ferramenta de Felipe
@@ -354,13 +336,9 @@ public class CallGraphWALA {
 
 		if (visited.contains(root)) {
 			System.out.println(str + "[*]" + getStandartMethodSignature(root.getMethod()));
-//			call = str + getStandartMethodSignature(root.getMethod());
 			return;
 		} else{
 			System.out.println(str + getStandartMethodSignature(root.getMethod()));
-//			call = str + getStandartMethodSignature(root.getMethod());
-//			calls.add(call);
-//			call = "";
 		}
 
 		visited.add(root);
@@ -372,17 +350,12 @@ public class CallGraphWALA {
 		visited.remove(root);
 	}
 	
-	private void getListOfCalls(){
-		
-	}
 
 	/*
 	 * Format the WALA method signature to the Standard signature pattern
 	 */
 	private static String getStandartMethodSignature(IMethod method) {
 		StringBuffer result = new StringBuffer();
-
-		// O pacote do método será null se ele estiver no pacote padrão
 		Atom methodPackage = method.getDeclaringClass().getName().getPackage();
 		if (methodPackage != null) {
 			result.append(method.getDeclaringClass().getName().getPackage()
