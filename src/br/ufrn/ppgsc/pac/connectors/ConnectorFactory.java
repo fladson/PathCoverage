@@ -40,6 +40,8 @@ public class ConnectorFactory {
 			githubConnector.setEndVersion(propConnections.getProperty(side + "_SYSTEM_END_VERSION"));
 			githubConnector.setBranch(propConnections.getProperty(side + "_SYSTEM_BRANCH"));
 			githubConnector.setPullRequests(propConnections.getProperty(side + "_SYSTEM_PULL_REQUESTS"));
+			githubConnector.setRepositoryLocalPath(propConnections.getProperty(side + "_SYSTEM_LOCAL_PATH"));
+			githubConnector.setSide(side);
 	    	githubConnector.performSetup();
 		}
 		return connector;

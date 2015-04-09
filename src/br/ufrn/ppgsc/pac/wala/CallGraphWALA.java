@@ -184,7 +184,7 @@ public class CallGraphWALA {
 				builder = Util.makeZeroOneCFABuilder(options,
 						new AnalysisCache(), cha, scope);
 				if(!entrypoints.iterator().hasNext()){
-					System.out.println("Não foi possível gerar um entrypoint para o sistema");
+					System.out.println("Nao foi possivel gerar um entrypoint para o sistema");
 					return;
 				}
 				this.cg = builder.makeCallGraph(options, null);

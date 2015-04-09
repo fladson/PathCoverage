@@ -15,32 +15,25 @@ import br.ufrn.ppgsc.pac.wala.CallGraphWALA;
 public class Main {
 	public static void main(String[] args) throws Exception {
 		System.out.println("|Inicio da analise|");
-		System.out.println("-|Baixando projeto do Github...");
+		System.out.println("-|Recuperando projeto SOURCE clonado localmente...");
+		// Repo master onde sera extraido o call graph completo e os metodos cobertos
 		Connector githubTargetConnector = new ConnectorFactory().getSystemConnector("GITHUB", "TARGET");
+		// Repo onde sera analisado apenas as alteracoes, apenas os metodos alterados serao extraidos
+		System.out.println("-|Baixando projeto TARGET do Github...");
 		Connector githubSourceConnector = new ConnectorFactory().getSystemConnector("GITHUB", "SOURCE");
-		RepositoryConnector repositoryConnector = new ConnectorFactory().getRepositoryConnector();
-		repositoryConnector.performSetup(githubTargetConnector.getRepositoryLocalPath());
+
+		System.out.println("-|Criando grafo de chamadas com o WALA...");
+		System.out.println("Path: " + githubTargetConnector.getRepositoryLocalPath());
+		CallGraphWALA cg = new CallGraphWALA();
+		cg.init(githubTargetConnector.getRepositoryLocalPath());
 		
-		System.out.println("-|Buscando metodos alterados do commit: nos arquivos...");
-		githubSourceConnector.getFilesChanged();
 		
 		
-//		System.out.println("-|Recuperando dados dos metodos cobertos do banco de dados...");
+//		System.out.println("-|Recuperando metodos cobertos do banco de dados...\n!Tenha certeza de ter rodado o AspectJ antes disso!");
 //		PostgreSQLJDBC db = new PostgreSQLJDBC();
 //		List<Node> coveredMethods = db.getAllCoveredMethods();
-		
-//		for (Node node : coveredMethods) {
-//			System.out.println(node.toString());
-//		}
-		
-//		System.out.println("-|Criando grafo de chamadas com o WALA...");
-//		CallGraphWALA cg = new CallGraphWALA();
-//		cg.init("C:/Users/fladson/Desktop/workspace_luna/SamplePathCoverage"); 
-//		cg.init("C:/Users/fladson/git/source");
-//		cg.init(githubTargetConnector.getRepositoryLocalPath());
-		
-		
-
+//		
+		githubSourceConnector.parseMethodsChangedOnCommitsRange();
 	
 		System.out.println("|Fim da analise|");
 	}

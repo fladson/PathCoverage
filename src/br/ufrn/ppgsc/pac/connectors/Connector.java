@@ -1,6 +1,10 @@
 package br.ufrn.ppgsc.pac.connectors;
 
+import java.util.Collection;
 import java.util.List;
+
+import br.ufrn.ppgsc.pac.model.UpdatedMethod;
+
 
 /**
  * UNIVERSIDADE FEDERAL DO RIO GRANDE DO NORTE - UFRN
@@ -25,6 +29,8 @@ public abstract class Connector {
 	protected String user;
 	protected String password;
 	protected String repositoryLocalPath;
+	
+	protected String side;
 
 	public Connector() {
 
@@ -44,13 +50,6 @@ public abstract class Connector {
 	 */
 	public void performRun() {
 
-	}
-	private List<String> getFilesOfRevision(String Revision){
-		return null;
-	}
-	
-	public List<String> getMethodsChangedOfRevision(String Revision) throws Exception{
-		return null;
 	}
 
 	public String getUrl() {
@@ -125,15 +124,25 @@ public abstract class Connector {
 		this.pullRequests = pullRequests;
 	}
 
+	public String getSide() {
+		return side;
+	}
+
+	public void setSide(String side) {
+		this.side = side;
+	}
+
 	@Override
 	public String toString() {
 		return "Connector [systemName=" + systemName + ", branch=" + branch
 				+ ", pullRequests=" + pullRequests + ", startVersion="
 				+ startVersion + ", endVersion=" + endVersion + ", url=" + url
 				+ ", user=" + user + ", password=" + password
-				+ ", repositoryLocalPath=" + repositoryLocalPath + "]";
+				+ ", repositoryLocalPath=" + repositoryLocalPath + ", side="
+				+ side + "]";
 	}
-
-	public void getFilesChanged() throws Exception {
+	
+	public void parseMethodsChangedOnCommitsRange() throws Exception{
+		
 	}
 }
