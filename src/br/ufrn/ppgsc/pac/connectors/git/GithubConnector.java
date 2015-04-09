@@ -24,6 +24,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Scanner;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.eclipse.egit.github.core.CommitFile;
 import org.eclipse.egit.github.core.IRepositoryIdProvider;
 import org.eclipse.egit.github.core.RepositoryCommit;
@@ -33,6 +34,7 @@ import org.eclipse.egit.github.core.service.CommitService;
 import org.eclipse.egit.github.core.service.RepositoryService;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.PullResult;
+import org.eclipse.jgit.api.errors.CheckoutConflictException;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.NoHeadException;
 import org.eclipse.jgit.lib.ObjectId;
@@ -121,8 +123,8 @@ public class GithubConnector extends Connector {
 					System.out.println("Erro no clone do repositorio");
 				else{
 					repositoryPath = repo.getRepository().getDirectory().getAbsolutePath();
-					System.out.println("Repositorio clonado para:" + repositoryPath);
-					System.out.println("-|Buscando metodos alterados no repositorio " + repo.getRepository().getWorkTree().getAbsolutePath() + "...");
+					System.out.println("Repositorio clonado para: " + repositoryPath);
+//					System.out.println("-|Buscando metodos alterados no repositorio " + repo.getRepository().getWorkTree().getAbsolutePath() + "...");
 				}
 					
 			} catch (GitAPIException | IOException e) {
@@ -188,7 +190,7 @@ public class GithubConnector extends Connector {
 			System.out.println("Metodos modificados: ");
 			for (Collection<UpdatedMethod> collection : changedMethods) {
 				for(UpdatedMethod method : collection ){
-					System.out.println(method.getMethodLimit().getSignature());
+					System.out.println(method.getKlass() + "." + method.getMethodLimit().getSignature());
 				}
 			}
 			
@@ -202,14 +204,43 @@ public class GithubConnector extends Connector {
 		if(this.startVersion.equals(this.endVersion)){
 			commitsOnRangeString.add(this.startVersion);
 		}else{
-			ObjectId start = repository.resolve(this.startVersion);
-			ObjectId end = repository.resolve(this.endVersion);
-			Iterable<RevCommit> commitsInRange = new Git(repository).log().addRange(start,end).call();	
-			for (RevCommit revCommit : commitsInRange) {
-				commitsOnRangeString.add(revCommit.name());
+			Iterable<RevCommit> logs = new Git(repository).log().call();
+	        List<String> commitsString = new ArrayList<String>();
+	        List<Integer> commitsOnRange = new ArrayList<Integer>();
+	        for(RevCommit c : logs){
+	        	commitsString.add(c.getId().getName());
+	        }
+	        
+	        for (int i = 0 ; i < commitsString.size()-1; i++) {
+	        	if(commitsString.get(i).equals(this.endVersion)){
+	        		commitsOnRange.add(i);
+	        		for(int j = i+1; !commitsString.get(j).equals(this.startVersion); j++){
+	        			commitsOnRange.add(j);
+	        		}
+	        	}
 			}
-			commitsOnRangeString.add(this.startVersion);
-		}
+	        
+	        for(Integer i : commitsOnRange){
+	        	commitsOnRangeString.add(commitsString.get(i));
+	        }
+	     }
+	        commitsOnRangeString.add(this.startVersion);
+//	        
+//			ObjectId start = repository.resolve(this.startVersion);
+//			ObjectId end = repository.resolve(this.endVersion);
+//			Iterable<RevCommit> commitsInRange = new Git(repository).log().addRange(start,end).call();
+//			List<RevCommit> commitsOnRange  = new ArrayList<RevCommit>();
+//			Iterable<RevCommit> start_only = new Git(repository).log().add(start).setMaxCount(1).call();
+//			
+//			for (RevCommit commit : start_only) {
+//				System.out.println(commit.abbreviate(7).name() + " " + commit.getShortMessage());
+//				commitsOnRange.add(commit);
+//			}
+//			for (RevCommit revCommit : commitsInRange) {
+//				commitsOnRangeString.add(revCommit.name());
+//			}
+//			commitsOnRangeString.add(this.startVersion);
+		
 		return commitsOnRangeString;
 	}
 	
@@ -238,15 +269,22 @@ public class GithubConnector extends Connector {
 	
 	
 	private void calculateChangedLines(String commit, String filename) throws Exception {
-		String so_prefix = "";
-		String command =  so_prefix +  "git blame -l " + getPreviousRevision(commit) + ".." + commit + " " + filename;
+		// Windows
+		String so_prefix = "cmd /c ";
+		// Mac
+//		String so_prefix = "";
+		String command = "";
+		if(getPreviousRevision(commit) != null )
+			command =  so_prefix +  "git blame -l " + getPreviousRevision(commit) + ".." + commit + " " + filename;
+		else
+			command =  so_prefix +  "git blame -l " + commit + ".." + commit + " " + filename;
 		try {
 			Process p = Runtime.getRuntime().exec(command, null, new File(this.repositoryLocalPath));
 			BufferedReader bf = new BufferedReader(new InputStreamReader(p.getInputStream()));
 			
 			String line = null;
 			while ((line = bf.readLine()) != null) {
-				UpdatedLine up = handleLine(line);
+				UpdatedLine up = handleLine(line, filename);
 				
 				if (up != null)
 					changedLines.add(up);
@@ -259,7 +297,7 @@ public class GithubConnector extends Connector {
 		}
 	}
 
-	private UpdatedLine handleLine(String gitblameline) throws IOException {
+	private UpdatedLine handleLine(String gitblameline, String filename) throws IOException {
 		Scanner in = new Scanner(gitblameline);
 		
 		String commit = in.next();
@@ -301,7 +339,7 @@ public class GithubConnector extends Connector {
 		sourceCode.append(source_line + System.lineSeparator());
 		
 		if (!commit.startsWith("^")) {
-			return new UpdatedLine(commit_date, commit, source_line, author_name, line_number);
+			return new UpdatedLine(commit_date, commit, source_line, author_name, line_number, filename.replace(".java", ""));
 		}
 		return null;
 	}
@@ -314,6 +352,7 @@ public class GithubConnector extends Connector {
 //		for (Commit p : commit.getParents()) {
 //			System.out.println(p.getSha()+ " - ");
 //		}
+		// TRATAR EXCECAO DE PRIMEIRO COMMIT
 		return commit.getParents().get(0).getSha();
 	}
 	

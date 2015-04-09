@@ -53,7 +53,7 @@ public class MethodLimitBuilder {
 						UpdatedMethod mu = result.get(m.getSignature());
 						
 						if (mu == null) {
-							mu = new UpdatedMethod(m);
+							mu = new UpdatedMethod(m,l.getKlass());
 							result.put(m.getSignature(), mu);
 						}
 						

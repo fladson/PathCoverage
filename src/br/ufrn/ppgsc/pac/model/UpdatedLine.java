@@ -11,13 +11,15 @@ public class UpdatedLine {
 	private String author;
 	private String line;
 	private int lineNumber;
+	private String klass;
 
-	public UpdatedLine(Date date, String revision, String author, String line, int lineNumber) {
+	public UpdatedLine(Date date, String revision, String author, String line, int lineNumber, String klass) {
 		this.date = date;
 		this.revision = revision;
 		this.author = author;
 		this.line = line;
 		this.lineNumber = lineNumber;
+		this.klass = klass;
 	}
 
 	public Date getDate() {
@@ -58,6 +60,10 @@ public class UpdatedLine {
 
 	public void setLineNumber(int lineNumber) {
 		this.lineNumber = lineNumber;
+	}
+
+	public String getKlass() {
+		return klass;
 	}
 
 }

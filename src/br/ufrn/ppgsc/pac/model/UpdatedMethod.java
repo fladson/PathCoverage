@@ -8,10 +8,12 @@ public class UpdatedMethod {
 
 	private List<UpdatedLine> lines;
 	private MethodLimit limit;
+	private String klass;
 
-	public UpdatedMethod(MethodLimit limit) {
+	public UpdatedMethod(MethodLimit limit, String klass) {
 		lines = new ArrayList<UpdatedLine>();
 		this.limit = limit;
+		this.klass = klass;
 	}
 
 	public void addUpdatedLine(UpdatedLine line) {
@@ -26,4 +28,7 @@ public class UpdatedMethod {
 		return limit;
 	}
 
+	public String getKlass() {
+		return klass;
+	}
 }
