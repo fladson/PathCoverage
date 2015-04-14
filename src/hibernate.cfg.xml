@@ -1,0 +1,33 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!DOCTYPE hibernate-configuration PUBLIC
+        "-//Hibernate/Hibernate Configuration DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd">
+
+<hibernate-configuration>
+
+	<session-factory>
+
+		<property name="connection.driver_class">org.postgresql.Driver</property>
+		<property name="connection.url">jdbc:postgresql://127.0.0.1:5432/scenario_analyzer_db</property>
+		<property name="connection.username">scenario_analyzer_user</property>
+		<property name="connection.password">123456</property>
+		<property name="connection.pool_size">1</property>
+
+		<property name="dialect">org.hibernate.dialect.PostgreSQLDialect</property>
+		<property name="show_sql">false</property>
+		<property name="format_sql">false</property>
+		<property name="hbm2ddl.auto">update</property>
+
+		<property name="hibernate.connection.autocommit">false</property>
+		<property name="hibernate.cache.use_query_cache">false</property>
+	    <property name="hibernate.cache.use_second_level_cache">false</property>
+	    <property name="hibernate.jdbc.batch_size">1000</property>
+	    <property name="hibernate.order_inserts">true</property>
+	    <property name="hibernate.order_updates">true</property>
+
+		<mapping class="br.ufrn.ppgsc.pac.model.RuntimeScenario" />
+		<mapping class="br.ufrn.ppgsc.pac.model.RuntimeNode" />
+
+	</session-factory>
+
+</hibernate-configuration>

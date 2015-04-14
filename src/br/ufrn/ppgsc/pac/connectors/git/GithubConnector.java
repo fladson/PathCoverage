@@ -70,6 +70,7 @@ public class GithubConnector extends Connector {
 	private CommitService commitService;
 	private String repositoryPath;
 	private List<String> changedFiles;
+	private List<String> changedMethodsString;
 	private List<Collection<UpdatedMethod>> changedMethods;
 	private List<UpdatedLine> changedLines;
 	private StringBuilder sourceCode;
@@ -156,7 +157,7 @@ public class GithubConnector extends Connector {
 				System.out.println("Repositorio recuperado localmente");
 			    repository.close();
 			}else{
-				System.out.println("Não foi possivel recuperar o repositorio localmente");
+				System.out.println("Nao foi possivel recuperar o repositorio localmente");
 				return;
 			}
 			
@@ -165,11 +166,12 @@ public class GithubConnector extends Connector {
 		}
 	}
 	
-	public void parseMethodsChangedOnCommitsRange() throws Exception{
+	public List<String> parseMethodsChangedOnCommitsRange() throws Exception{
 		System.out.println("Recuperando metodos modificados");
 		try {
 			this.commitsOnRangeString = this.getCommitsInRange();
 			changedMethods = new ArrayList<Collection<UpdatedMethod>>();
+			changedMethodsString = new ArrayList<String>();
 			for (String commit : commitsOnRangeString) {
 				
 				List<String> changedFilesInRevision = getFilesOfRevision(commit);
@@ -191,6 +193,7 @@ public class GithubConnector extends Connector {
 			System.out.println("Metodos modificados: ");
 			for (Collection<UpdatedMethod> collection : changedMethods) {
 				for(UpdatedMethod method : collection ){
+					changedMethodsString.add(method.getKlass() + "." + method.getMethodLimit().getSignature());
 					System.out.println(method.getKlass() + "." + method.getMethodLimit().getSignature());
 				}
 			}
@@ -198,51 +201,40 @@ public class GithubConnector extends Connector {
 		} catch (IOException | GitAPIException e) {
 			e.printStackTrace();
 		}
+		return changedMethodsString;
 	}
 
 	private List<String> getCommitsInRange() throws Exception{
-		commitsOnRangeString = new ArrayList<String>();
-		if(this.startVersion.equals(this.endVersion)){
-			commitsOnRangeString.add(this.startVersion);
+		if(getPreviousRevision(this.startVersion).equals("nil")){
+			System.out.println("O primeiro commit de um repositorio nao pode ser analisado por nao conter alteracoes\n"
+					+ "Favor modificar o start version no arquivo connections.properties");
+			System.exit(0);
 		}else{
-			Iterable<RevCommit> logs = new Git(repository).log().call();
-	        List<String> commitsString = new ArrayList<String>();
-	        List<Integer> commitsOnRange = new ArrayList<Integer>();
-	        for(RevCommit c : logs){
-	        	commitsString.add(c.getId().getName());
-	        }
-	        
-	        for (int i = 0 ; i < commitsString.size()-1; i++) {
-	        	if(commitsString.get(i).equals(this.endVersion)){
-	        		commitsOnRange.add(i);
-	        		for(int j = i+1; !commitsString.get(j).equals(this.startVersion); j++){
-	        			commitsOnRange.add(j);
-	        		}
-	        	}
-			}
-	        
-	        for(Integer i : commitsOnRange){
-	        	commitsOnRangeString.add(commitsString.get(i));
-	        }
-	     }
-		if(!getPreviousRevision(this.startVersion).equals("nil"))
-			commitsOnRangeString.add(this.startVersion);
-//	        
-//			ObjectId start = repository.resolve(this.startVersion);
-//			ObjectId end = repository.resolve(this.endVersion);
-//			Iterable<RevCommit> commitsInRange = new Git(repository).log().addRange(start,end).call();
-//			List<RevCommit> commitsOnRange  = new ArrayList<RevCommit>();
-//			Iterable<RevCommit> start_only = new Git(repository).log().add(start).setMaxCount(1).call();
-//			
-//			for (RevCommit commit : start_only) {
-//				System.out.println(commit.abbreviate(7).name() + " " + commit.getShortMessage());
-//				commitsOnRange.add(commit);
-//			}
-//			for (RevCommit revCommit : commitsInRange) {
-//				commitsOnRangeString.add(revCommit.name());
-//			}
-//			commitsOnRangeString.add(this.startVersion);
-		
+			commitsOnRangeString = new ArrayList<String>();
+			if(this.startVersion.equals(this.endVersion)){
+				commitsOnRangeString.add(this.startVersion);
+			}else{
+				Iterable<RevCommit> logs = new Git(repository).log().call();
+		        List<String> commitsString = new ArrayList<String>();
+		        List<Integer> commitsOnRange = new ArrayList<Integer>();
+		        for(RevCommit c : logs){
+		        	commitsString.add(c.getId().getName());
+		        }
+		        
+		        for (int i = 0 ; i < commitsString.size()-1; i++) {
+		        	if(commitsString.get(i).equals(this.endVersion)){
+		        		commitsOnRange.add(i);
+		        		for(int j = i+1; !commitsString.get(j).equals(this.startVersion); j++){
+		        			commitsOnRange.add(j);
+		        		}
+		        	}
+				}
+		        
+		        for(Integer i : commitsOnRange){
+		        	commitsOnRangeString.add(commitsString.get(i));
+		        }
+		     }
+		}
 		return commitsOnRangeString;
 	}
 	

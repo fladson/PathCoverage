@@ -19,5 +19,14 @@
 	<classpathentry kind="lib" path="libs/jsdg-stubs-jre1.5.jar"/>
 	<classpathentry kind="lib" path="libs/org.eclipse.egit.github.core-2.1.5.jar"/>
 	<classpathentry kind="lib" path="libs/org.eclipse.jgit-3.3.2.201404171909-r.jar"/>
+	<classpathentry kind="lib" path="libs/hibernate_3.6.10/antlr-2.7.6.jar"/>
+	<classpathentry kind="lib" path="libs/hibernate_3.6.10/commons-collections-3.1.jar"/>
+	<classpathentry kind="lib" path="libs/hibernate_3.6.10/dom4j-1.6.1.jar"/>
+	<classpathentry kind="lib" path="libs/hibernate_3.6.10/hibernate-jpa-2.0-api-1.0.1.Final.jar"/>
+	<classpathentry kind="lib" path="libs/hibernate_3.6.10/hibernate3.jar"/>
+	<classpathentry kind="lib" path="libs/hibernate_3.6.10/javassist-3.12.0.GA.jar"/>
+	<classpathentry kind="lib" path="libs/hibernate_3.6.10/jta-1.1.jar"/>
+	<classpathentry kind="lib" path="libs/hibernate_3.6.10/slf4j-api-1.6.1.jar"/>
+	<classpathentry kind="lib" path="libs/hibernate_3.6.10/slf4j-simple-1.6.1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

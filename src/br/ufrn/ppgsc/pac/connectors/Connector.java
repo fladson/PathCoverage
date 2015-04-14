@@ -142,7 +142,7 @@ public abstract class Connector {
 				+ side + "]";
 	}
 	
-	public void parseMethodsChangedOnCommitsRange() throws Exception{
-		
+	public List<String> parseMethodsChangedOnCommitsRange() throws Exception{
+		return null;
 	}
 }

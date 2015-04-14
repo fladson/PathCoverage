@@ -32,6 +32,9 @@ public class PostgreSQLJDBC {
 		}
 	}
 
+	/*
+	 * Os roots sao os metodos de teste que iniciam a cadeia de chamadas
+	 */
 	public String getRootsIds() throws SQLException {
 		if(c == null){
 			connectToDatabase();
