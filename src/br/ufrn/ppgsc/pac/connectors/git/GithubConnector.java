@@ -171,6 +171,7 @@ public class GithubConnector extends Connector {
 			this.commitsOnRangeString = this.getCommitsInRange();
 			changedMethods = new ArrayList<Collection<UpdatedMethod>>();
 			for (String commit : commitsOnRangeString) {
+				
 				List<String> changedFilesInRevision = getFilesOfRevision(commit);
 				System.out.println("Buscando metodos alterados no commit: " + commit.substring(0, 7));
 				this.changedFiles = new ArrayList<String>();
@@ -199,7 +200,7 @@ public class GithubConnector extends Connector {
 		}
 	}
 
-	private List<String> getCommitsInRange() throws IOException, NoHeadException, GitAPIException{
+	private List<String> getCommitsInRange() throws Exception{
 		commitsOnRangeString = new ArrayList<String>();
 		if(this.startVersion.equals(this.endVersion)){
 			commitsOnRangeString.add(this.startVersion);
@@ -224,7 +225,8 @@ public class GithubConnector extends Connector {
 	        	commitsOnRangeString.add(commitsString.get(i));
 	        }
 	     }
-	        commitsOnRangeString.add(this.startVersion);
+		if(!getPreviousRevision(this.startVersion).equals("nil"))
+			commitsOnRangeString.add(this.startVersion);
 //	        
 //			ObjectId start = repository.resolve(this.startVersion);
 //			ObjectId end = repository.resolve(this.endVersion);
@@ -274,10 +276,8 @@ public class GithubConnector extends Connector {
 		// Mac
 //		String so_prefix = "";
 		String command = "";
-		if(getPreviousRevision(commit) != null )
-			command =  so_prefix +  "git blame -l " + getPreviousRevision(commit) + ".." + commit + " " + filename;
-		else
-			command =  so_prefix +  "git blame -l " + commit + ".." + commit + " " + filename;
+		command =  so_prefix +  "git blame -l " + getPreviousRevision(commit) + ".." + commit + " " + filename;
+
 		try {
 			Process p = Runtime.getRuntime().exec(command, null, new File(this.repositoryLocalPath));
 			BufferedReader bf = new BufferedReader(new InputStreamReader(p.getInputStream()));
@@ -352,8 +352,11 @@ public class GithubConnector extends Connector {
 //		for (Commit p : commit.getParents()) {
 //			System.out.println(p.getSha()+ " - ");
 //		}
-		// TRATAR EXCECAO DE PRIMEIRO COMMIT
-		return commit.getParents().get(0).getSha();
+		// Descartando primeiro commit de um repo pois ele nao possui alteracoes
+		if(commit.getParents().isEmpty()){
+			return "nil";
+		}else
+			return commit.getParents().get(0).getSha();
 	}
 	
 	
