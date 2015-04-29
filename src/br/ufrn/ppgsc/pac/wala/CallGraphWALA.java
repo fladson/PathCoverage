@@ -267,18 +267,18 @@ public class CallGraphWALA {
 	private void printCallGraphNode(CallGraph cg, CGNode currNode, int level) throws IOException {
 		if (getAtomLoaderReference(currNode) != AnalysisScope.PRIMORDIAL) {
 			printLevelTabs(level);
-			System.out.println(currNode.getMethod().getSignature());
+//			System.out.println(currNode.getMethod().getSignature());
 			out.write(getStandartMethodSignature(currNode.getMethod())+"\n");
-			for (Iterator<CGNode> preds = cg.getPredNodes(currNode); preds.hasNext();) {
-				printCallGraphNode(cg, preds.next(), level + 1);
+			for (Iterator<CGNode> sucessores = cg.getSuccNodes(currNode); sucessores.hasNext();) {
+				printCallGraphNode(cg, sucessores.next(), level + 1);
 			}
 		}
 	}
 
 	private void printLevelTabs(int level) throws IOException {
 		for (int i = 0; i < level; i++){
-			System.out.print("\t");
-			out.write("\t");
+//			System.out.print("\t");
+			out.write(">");
 		}
 	}
 

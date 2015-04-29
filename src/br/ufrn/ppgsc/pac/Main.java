@@ -20,6 +20,8 @@ import br.ufrn.ppgsc.pac.wala.CallGraphWALA;
 public class Main {
 	public static void main(String[] args) throws Exception {
 		
+		// TODO Melhorar nome dos metodos para ficar auto explicativo, tentar quebrar mais os passos
+		
 		System.out.println("|Inicio da analise|");
 		System.out.println("-|Recuperando projeto TARGET clonado localmente...");
 		// Repo master onde sera extraido o call graph completo e os metodos cobertos
@@ -28,7 +30,7 @@ public class Main {
 		System.out.println("-|Criando grafo de chamadas com o WALA...");
 		System.out.println("Path: " + githubTargetConnector.getRepositoryLocalPath());
 		CallGraphWALA cg = new CallGraphWALA();
-//		cg.init(githubTargetConnector.getRepositoryLocalPath());
+		cg.init(githubTargetConnector.getRepositoryLocalPath());
 	
 		System.out.println("-|Recuperando caminhos cobertos do banco de dados...\n!Tenha certeza de ter rodado o AspectJ antes disso!");
 		GenericDAO<RuntimeScenario> dao = new DatabaseService<RuntimeScenario>().getGenericDAO();

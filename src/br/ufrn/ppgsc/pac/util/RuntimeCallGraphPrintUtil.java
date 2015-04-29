@@ -72,6 +72,6 @@ public abstract class RuntimeCallGraphPrintUtil {
 		buffer.append(System.lineSeparator());
 		
 		for (RuntimeNode node : root.getChildren())
-			printTreeNode(node, tabs + "\t", buffer);
+			printTreeNode(node, tabs + ">", buffer);
 	}
 }

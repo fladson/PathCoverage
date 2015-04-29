@@ -1,3 +1,0 @@
-src/br/ufrn/ppgsc/A.soma
-src/br/ufrn/ppgsc/D.multD
-src/br/ufrn/ppgsc/D.D
