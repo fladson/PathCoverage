@@ -24,34 +24,45 @@ import br.ufrn.ppgsc.pac.util.PropertiesUtil;
  */
 public class ConnectorFactory {
 	
-	public Connector getSystemConnector(String connectorName, String side) throws Exception{
-			
-		Properties propConnector = PropertiesUtil.getPropertieFile("connectors");
-		Properties propConnections = PropertiesUtil.getPropertieFile("connections");
-		Connector connector = (Connector) Class.forName(propConnector.getProperty(connectorName)).newInstance();
+	Properties propConnections;
+	Properties propConnector;
+	Properties propConfig;
+	public ConnectorFactory() throws IOException{
+		propConnections = PropertiesUtil.getPropertieFile("connections");
+		propConnector = PropertiesUtil.getPropertieFile("connectors");
+		propConfig = PropertiesUtil.getPropertieFile("config");
+	}
 	
+	
+	public EvolutionConnector getEvolutionConnector(String connectorName) throws Exception{
+			
+		EvolutionConnector connector = (EvolutionConnector) Class.forName(propConnector.getProperty(connectorName)).newInstance();
+		
 		if(connector instanceof GithubConnector){
 			GithubConnector githubConnector = (GithubConnector) connector;
-			githubConnector.setUrl(propConnections.getProperty(side + "_SYSTEM_URL"));
-			githubConnector.setUser(propConnections.getProperty(side + "_SYSTEM_USER"));
-			githubConnector.setPassword(propConnections.getProperty(side + "_SYSTEM_PASSWORD"));
-			githubConnector.setSystemName(propConnections.getProperty(side + "_SYSTEM_NAME"));
-			githubConnector.setStartVersion(propConnections.getProperty(side + "_SYSTEM_START_VERSION"));
-			githubConnector.setEndVersion(propConnections.getProperty(side + "_SYSTEM_END_VERSION"));
-			githubConnector.setBranch(propConnections.getProperty(side + "_SYSTEM_BRANCH"));
-			githubConnector.setPullRequests(propConnections.getProperty(side + "_SYSTEM_PULL_REQUESTS"));
-			githubConnector.setRepositoryLocalPath(propConnections.getProperty(side + "_SYSTEM_LOCAL_PATH"));
-			githubConnector.setSide(side);
-	    	githubConnector.performSetup();
+			githubConnector.setUrl(propConnections.getProperty("GITHUB_URL"));
+			githubConnector.setUser(propConnections.getProperty("GITHUB_USER"));
+			githubConnector.setToken(propConnections.getProperty("GITHUB_TOKEN"));
+			githubConnector.setStartVersion(propConnections.getProperty("EVOLUTION_START_VERSION"));
+			githubConnector.setEndVersion(propConnections.getProperty("EVOLUTION_END_VERSION"));
+			githubConnector.setBranch(propConnections.getProperty("EVOLUTION_BRANCH"));
+			githubConnector.setPullRequests(propConnections.getProperty("EVOLUTION_PULL_REQUEST"));
+			githubConnector.setRepositoryLocalPath(propConnections.getProperty("REPOSITORY_LOCAL_PATH"));
 		}
 		return connector;
 	}
 	
-	public RepositoryConnector getRepositoryConnector() throws Exception{
-		Properties propConfig = PropertiesUtil.getPropertieFile("config");
-		String connectorName = propConfig.getProperty("REPOSITORY_CONNECTOR");
+	public SCMConnector getSCMConnector(String repositoryConnectorName) throws Exception{
+//		String connectorName = propConfig.getProperty("REPOSITORY_CONNECTOR");
 		Properties propConnector = PropertiesUtil.getPropertieFile("connectors");
-		RepositoryConnector connector = (RepositoryConnector) Class.forName(propConnector.getProperty(connectorName)).newInstance();
-		return connector;
+		SCMConnector repositoryConnector = (SCMConnector) Class.forName(propConnector.getProperty(repositoryConnectorName)).newInstance();
+		
+		if(repositoryConnector instanceof GitConnector){
+			GitConnector gitConnector = (GitConnector) repositoryConnector;
+			gitConnector.setRepositoryLocalPath(propConnections.getProperty("REPORITORY_LOCAL_PATH"));
+			gitConnector.setRepositoryName(propConnections.getProperty("REPOSITORY_NAME"));
+		}
+		
+		return repositoryConnector;
 	}
 }

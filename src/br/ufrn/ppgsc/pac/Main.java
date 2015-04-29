@@ -5,9 +5,9 @@ import java.util.List;
 
 import com.ibm.wala.shrikeCT.InvalidClassFileException;
 
-import br.ufrn.ppgsc.pac.connectors.Connector;
+import br.ufrn.ppgsc.pac.connectors.EvolutionConnector;
 import br.ufrn.ppgsc.pac.connectors.ConnectorFactory;
-import br.ufrn.ppgsc.pac.connectors.RepositoryConnector;
+import br.ufrn.ppgsc.pac.connectors.SCMConnector;
 import br.ufrn.ppgsc.pac.db.DatabaseService;
 import br.ufrn.ppgsc.pac.db.GenericDAO;
 import br.ufrn.ppgsc.pac.db.PostgreSQLJDBC;
@@ -19,42 +19,37 @@ import br.ufrn.ppgsc.pac.wala.CallGraphWALA;
 
 public class Main {
 	public static void main(String[] args) throws Exception {
+		System.out.println("|Path Coverage Analysis|");
 		
-		// TODO Melhorar nome dos metodos para ficar auto explicativo, tentar quebrar mais os passos
+//		SCMConnector gitConnector = new ConnectorFactory().getSCMConnector("GIT");
+//		gitConnector.performSetup();
+//		
+//		CallGraphWALA cg = new CallGraphWALA();
+//		cg.saveWalaCallGraphToFile(gitConnector.getRepositoryLocalPath());
+//
+//		System.out.println("\n-|Recovering covered paths from the database...");
+//		GenericDAO<RuntimeScenario> dao = new DatabaseService<RuntimeScenario>().getGenericDAO();
+//		List<RuntimeScenario> scenarios = dao.readAll(RuntimeScenario.class);
+//		Appendable buffer = new StringBuffer();
+//		for (RuntimeScenario runtimeScenario : scenarios) {
+//			RuntimeCallGraphPrintUtil.printScenarioTree(runtimeScenario, buffer);
+//		}
+//		FileWriter out = new FileWriter("coveredPaths.txt");;
+//		out.write(buffer.toString());
+//		out.close();
+//		System.out.println("\t-|Covered paths saved to file: coveredPaths.txt");
+//		
 		
-		System.out.println("|Inicio da analise|");
-		System.out.println("-|Recuperando projeto TARGET clonado localmente...");
-		// Repo master onde sera extraido o call graph completo e os metodos cobertos
-		Connector githubTargetConnector = new ConnectorFactory().getSystemConnector("GITHUB", "TARGET");
+		EvolutionConnector githubConnector = new ConnectorFactory().getEvolutionConnector("GITHUB");
+		githubConnector.performSetup();
+		
+		List<String> changedMethods = githubConnector.getChangedMethodsFromEvolution();
 
-		System.out.println("-|Criando grafo de chamadas com o WALA...");
-		System.out.println("Path: " + githubTargetConnector.getRepositoryLocalPath());
-		CallGraphWALA cg = new CallGraphWALA();
-		cg.init(githubTargetConnector.getRepositoryLocalPath());
-	
-		System.out.println("-|Recuperando caminhos cobertos do banco de dados...\n!Tenha certeza de ter rodado o AspectJ antes disso!");
-		GenericDAO<RuntimeScenario> dao = new DatabaseService<RuntimeScenario>().getGenericDAO();
-		List<RuntimeScenario> scenarios = dao.readAll(RuntimeScenario.class);
-		Appendable buffer = new StringBuffer();
-		for (RuntimeScenario runtimeScenario : scenarios) {
-			RuntimeCallGraphPrintUtil.printScenarioTree(runtimeScenario, buffer);
-		}
-
-		System.out.println("Caminhos cobertos capturados");
-		FileWriter out = new FileWriter("coveredPaths.txt");;
-		System.out.println(buffer);
-		out.write(buffer.toString());
-		out.close();
-		
-//		// Repo onde sera analisado apenas as alteracoes, apenas os metodos alterados serao extraidos
-		System.out.println("-|Baixando projeto SOURCE do Github...");
-		Connector githubSourceConnector = new ConnectorFactory().getSystemConnector("GITHUB", "SOURCE");
 		FileWriter out2 = new FileWriter("changedMethods.txt");
-		List<String> changedMethods = githubSourceConnector.parseMethodsChangedOnCommitsRange();
 		for (String method : changedMethods) {
 			out2.write(method.replace("/", ".")+"\n");
 		}
 		out2.close();
-		System.out.println("|Fim da analise|");
+		System.out.println("|End of analysis|");
 	}
 }

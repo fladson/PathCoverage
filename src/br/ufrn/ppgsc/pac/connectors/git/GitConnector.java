@@ -9,53 +9,39 @@ import org.eclipse.egit.github.core.CommitFile;
 import org.eclipse.egit.github.core.RepositoryCommit;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.revwalk.RevTree;
+import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 
-import br.ufrn.ppgsc.pac.connectors.Connector;
-import br.ufrn.ppgsc.pac.connectors.RepositoryConnector;
+import br.ufrn.ppgsc.pac.connectors.EvolutionConnector;
+import br.ufrn.ppgsc.pac.connectors.SCMConnector;
 
-public class GitConnector implements RepositoryConnector {
+public class GitConnector extends SCMConnector {
 	
-	Repository repository = null;
-	protected String lastRevision;
+	private Repository localRepository;
+	private FileRepositoryBuilder builder;
 
 	@Override
-	public List<String> getFilesOfRevision(String Revision) throws Exception {
-		return null;
-	}
-
-	@Override
-	public List<String> getMethodsChangedOfRevision(String Revision)
-			throws Exception {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public String getPreviousRevision(String path, String actualRevision)
-			throws Exception {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public String getRepositoryPath() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public void performSetup(String repositoryLocalPath) {
-		// como o clone ficou para o github connector, aqui é feito a operação de leitura e afins
-		File file = new File(repositoryLocalPath);
-		FileRepositoryBuilder builder = new FileRepositoryBuilder();
+	public void performSetup() {
+		builder = new FileRepositoryBuilder();
 		try {
-			repository = builder.setWorkTree(file).readEnvironment().findGitDir().build();
+			localRepository = builder.findGitDir(new File(this.repositoryLocalPath)).build();
+		    ObjectId headId = localRepository.resolve(Constants.HEAD);
+			if (headId != null) {
+				System.out.println("Having local repository at: " + localRepository.getDirectory());
+				localRepository.close();
+			} else {
+				System.out.println("Error reading local git repository");
+				System.exit(0);
+			}
+
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-	}
+	}	
 }
