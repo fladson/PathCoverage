@@ -22,6 +22,7 @@ public abstract class EvolutionConnector {
 	protected String systemName;
 	protected String branch;
 	protected String pullRequest;
+	protected String evolutionLocalPath;
 	protected String startVersion;
 	protected String endVersion;
 
@@ -117,12 +118,20 @@ public abstract class EvolutionConnector {
 		this.branch = branch;
 	}
 
-	public String getPullRequests() {
+	public String getPullRequest() {
 		return pullRequest;
 	}
 
-	public void setPullRequests(String pullRequests) {
-		this.pullRequest = pullRequests;
+	public void setPullRequest(String pullRequest) {
+		this.pullRequest = pullRequest;
+	}
+
+	public String getEvolutionLocalPath() {
+		return evolutionLocalPath;
+	}
+
+	public void setEvolutionLocalPath(String evolutionLocalPath) {
+		this.evolutionLocalPath = evolutionLocalPath;
 	}
 
 	@Override

@@ -26,11 +26,15 @@ import java.util.Scanner;
 
 import org.eclipse.egit.github.core.CommitFile;
 import org.eclipse.egit.github.core.IRepositoryIdProvider;
+import org.eclipse.egit.github.core.Repository;
 import org.eclipse.egit.github.core.RepositoryCommit;
 import org.eclipse.egit.github.core.RepositoryId;
 import org.eclipse.egit.github.core.client.GitHubClient;
 import org.eclipse.egit.github.core.service.CommitService;
+import org.eclipse.egit.github.core.service.PullRequestService;
 import org.eclipse.egit.github.core.service.RepositoryService;
+import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.errors.GitAPIException;
 
 import br.ufrn.ppgsc.pac.connectors.EvolutionConnector;
 import br.ufrn.ppgsc.pac.jdt.MethodLimitBuilder;
@@ -53,15 +57,16 @@ import br.ufrn.ppgsc.pac.model.UpdatedMethod;
 
 public class GithubConnector extends EvolutionConnector {
 
-	private GitHubClient githubClientManager;
-	private RepositoryService githubRepositoryService;
-	private org.eclipse.egit.github.core.Repository githubRepository;
+	private GitHubClient clientManager;
+	private RepositoryService repositoryService;
+	private Repository repository;
 	private IRepositoryIdProvider repository_id;
 	private CommitService commitService;
-	private String repositoryPath;
+	private PullRequestService pullRequestService;
+	
 	private List<String> changedFiles;
-	private List<String> changedMethodsString;
 	private List<Collection<UpdatedMethod>> changedMethods;
+	private List<String> changedMethodsString;
 	private List<UpdatedLine> changedLines;
 	private StringBuilder sourceCode;
 	private List<String> commitsOnRangeString;
@@ -69,13 +74,14 @@ public class GithubConnector extends EvolutionConnector {
 	@Override
 	public void performSetup() {
 		repository_id = RepositoryId.createFromUrl(url);
-		githubClientManager = new GitHubClient().setOAuth2Token(token);
-		githubRepositoryService = new RepositoryService();
-		commitService = new CommitService(githubClientManager);
+		clientManager = new GitHubClient().setOAuth2Token(token);
+		repositoryService = new RepositoryService();
+		commitService = new CommitService(clientManager);
+		pullRequestService = new PullRequestService(clientManager);
 		try {
-			githubRepository = githubRepositoryService.getRepository(repository_id);
-			if(!githubRepository.getUrl().equals("")){
-				System.out.println("Having Github Logical Repository: " + githubRepository.getName());
+			repository = repositoryService.getRepository(repository_id);
+			if(!repository.getUrl().equals("")){
+				System.out.println("Having Github Logical Repository: " + repository.getName());
 			}
 		} catch (IOException e) {
 			System.out.println("Erro na comunicacao do repositorio Github: ");
@@ -93,22 +99,19 @@ public class GithubConnector extends EvolutionConnector {
 			for (String commit : commitsOnRangeString) {
 
 				List<String> changedFilesInRevision = getFilesOfRevision(commit);
-				System.out.println("Buscando metodos alterados no commit: "
-						+ commit.substring(0, 7));
+				System.out.println("\t Searching changed methods on commit: "+ commit.substring(0, 7));
 				this.changedFiles = new ArrayList<String>();
-				System.out.println("Arquivos modificados: ");
+				System.out.println("\tModified Files: ");
 				for (String file : changedFilesInRevision) {
 					changedLines = new ArrayList<UpdatedLine>();
 					sourceCode = new StringBuilder();
 
-					System.out.println("\t" + file);
+					System.out.println("\t\t" + file);
 					changedFiles.add(file);
 					calculateChangedLines(commit, file);
 
-					MethodLimitBuilder builder = new MethodLimitBuilder(
-							sourceCode.toString());
-					changedMethods.add(builder
-							.filterChangedMethods(changedLines));
+					MethodLimitBuilder builder = new MethodLimitBuilder(sourceCode.toString());
+					changedMethods.add(builder.filterChangedMethods(changedLines));
 				}
 			}
 			System.out.println("Metodos modificados: ");
@@ -128,80 +131,80 @@ public class GithubConnector extends EvolutionConnector {
 	}
 
 	private List<String> getCommitsInRange() throws Exception {
-		if (getPreviousRevision(this.startVersion).equals("nil")) {
-			System.out
-					.println("O primeiro commit de um repositorio nao pode ser analisado por nao conter alteracoes\n"
-							+ "Favor modificar o start version no arquivo connections.properties");
-			System.exit(0);
-		} else {
-			commitsOnRangeString = new ArrayList<String>();
-			if (this.startVersion.equals(this.endVersion)) {
-				commitsOnRangeString.add(this.startVersion);
+		commitsOnRangeString = new ArrayList<String>();
+		// Pull Request
+		if(!this.getPullRequest().equals("")){
+			for(RepositoryCommit commit : pullRequestService.getCommits(repository_id, new Integer(getPullRequest()))){
+				commitsOnRangeString.add(commit.getSha());
+			}
+			
+		}else{
+			// Commit range
+			// TODO
+			if (getPreviousRevision(this.startVersion).equals("nil")) {
+				System.out
+						.println("O primeiro commit de um repositorio nao pode ser analisado por nao conter alteracoes\n"
+								+ "Favor modificar o start version no arquivo connections.properties");
+				System.exit(0);
 			} else {
-				List<RepositoryCommit> log = commitService.getCommits(githubRepository, branch, null);
-				List<String> commitsString = new ArrayList<String>();
-				List<Integer> commitsOnRange = new ArrayList<Integer>();
-				for (RepositoryCommit commit : log) {
-					commitsString.add(commit.getSha());
-				}
+				if (this.startVersion.equals(this.endVersion)) {
+					commitsOnRangeString.add(this.startVersion);
+				} else {
+					List<RepositoryCommit> log = commitService.getCommits(repository, branch, null);
+					List<String> commitsString = new ArrayList<String>();
+					List<Integer> commitsOnRange = new ArrayList<Integer>();
+					for (RepositoryCommit commit : log) {
+						commitsString.add(commit.getSha());
+					}
 
-				for (int i = 0; i < commitsString.size() - 1; i++) {
-					if (commitsString.get(i).equals(this.endVersion)) {
-						commitsOnRange.add(i);
-						for (int j = i + 1; !commitsString.get(j).equals(this.startVersion); j++) {
-							commitsOnRange.add(j);
+					for (int i = 0; i < commitsString.size() - 1; i++) {
+						if (commitsString.get(i).equals(this.endVersion)) {
+							commitsOnRange.add(i);
+							for (int j = i + 1; !commitsString.get(j).equals(this.startVersion); j++) {
+								commitsOnRange.add(j);
+							}
 						}
 					}
-				}
-				for (Integer i : commitsOnRange) {
-					commitsOnRangeString.add(commitsString.get(i));
+					for (Integer i : commitsOnRange) {
+						commitsOnRangeString.add(commitsString.get(i));
+					}
 				}
 			}
 		}
+		
 		return commitsOnRangeString;
 	}
 
 	@Override
 	public List<String> getFilesOfRevision(String revision) {
 		List<String> commitFilesString = new ArrayList<String>();
-		RepositoryCommit lastCommit;
-		try {
-			if (revision.isEmpty()) {
-				// pegar ultimo commit do branch atual
-				String last_revision = commitService.getCommits(repository_id)
-						.get(0).getSha();
-				lastCommit = commitService.getCommit(repository_id,
-						last_revision);
-			} else {
-				lastCommit = commitService.getCommit(repository_id, revision);
+		RepositoryCommit commit;
+			try {
+				commit = commitService.getCommit(repository_id, revision);
+				List<CommitFile> commitFiles = commit.getFiles();
+				for (CommitFile commitFile : commitFiles) {
+					String fileName = commitFile.getFilename().toString();
+					if (fileName.contains(".java"))
+						commitFilesString.add(fileName);
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
 			}
-			List<CommitFile> commitFiles = lastCommit.getFiles();
-			for (CommitFile commitFile : commitFiles) {
-				String fileName = commitFile.getFilename().toString();
-				if (fileName.contains(".java"))
-					commitFilesString.add(fileName);
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
 		return commitFilesString;
 	}
 
 	private void calculateChangedLines(String commit, String filename)
 			throws Exception {
 		// Windows
-		String so_prefix = "cmd /c ";
+//		String so_prefix = "cmd /c ";
 		// Mac
-		// String so_prefix = "";
+		 String so_prefix = "";
 		String command = "";
-		command = so_prefix + "git blame -l " + getPreviousRevision(commit)
-				+ ".." + commit + " " + filename;
+		command = so_prefix + "git blame -l " + getPreviousRevision(commit)+ ".." + commit + " " + filename;
 
 		try {
-			Process p = Runtime.getRuntime().exec(command, null,
-					new File(this.repositoryLocalPath));
-			BufferedReader bf = new BufferedReader(new InputStreamReader(
-					p.getInputStream()));
+			Process p = Runtime.getRuntime().exec(command, null, new File(this.evolutionLocalPath));
+			BufferedReader bf = new BufferedReader(new InputStreamReader(p.getInputStream()));
 
 			String line = null;
 			while ((line = bf.readLine()) != null) {

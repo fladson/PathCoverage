@@ -1,5 +1,6 @@
 package br.ufrn.ppgsc.pac;
 
+import java.io.File;
 import java.io.FileWriter;
 import java.util.List;
 
@@ -13,6 +14,7 @@ import br.ufrn.ppgsc.pac.db.GenericDAO;
 import br.ufrn.ppgsc.pac.db.PostgreSQLJDBC;
 import br.ufrn.ppgsc.pac.model.Node;
 import br.ufrn.ppgsc.pac.model.RuntimeScenario;
+import br.ufrn.ppgsc.pac.util.ChangedMethodUtil;
 import br.ufrn.ppgsc.pac.util.PropertiesUtil;
 import br.ufrn.ppgsc.pac.util.RuntimeCallGraphPrintUtil;
 import br.ufrn.ppgsc.pac.wala.CallGraphWALA;
@@ -50,6 +52,11 @@ public class Main {
 			out2.write(method.replace("/", ".")+"\n");
 		}
 		out2.close();
+		
+		ChangedMethodUtil.formatChangedMehodsFromFile();
+		
+		Runtime.getRuntime().exec("python tree_parser.py", null, new File(System.getProperty("user.dir")));
+		
 		System.out.println("|End of analysis|");
 	}
 }

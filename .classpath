@@ -28,5 +28,6 @@
 	<classpathentry kind="lib" path="libs/hibernate_3.6.10/jta-1.1.jar"/>
 	<classpathentry kind="lib" path="libs/hibernate_3.6.10/slf4j-api-1.6.1.jar"/>
 	<classpathentry kind="lib" path="libs/hibernate_3.6.10/slf4j-simple-1.6.1.jar"/>
+	<classpathentry kind="lib" path="libs/commons-lang3-3.4.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

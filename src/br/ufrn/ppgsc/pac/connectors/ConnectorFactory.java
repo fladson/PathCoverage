@@ -46,8 +46,8 @@ public class ConnectorFactory {
 			githubConnector.setStartVersion(propConnections.getProperty("EVOLUTION_START_VERSION"));
 			githubConnector.setEndVersion(propConnections.getProperty("EVOLUTION_END_VERSION"));
 			githubConnector.setBranch(propConnections.getProperty("EVOLUTION_BRANCH"));
-			githubConnector.setPullRequests(propConnections.getProperty("EVOLUTION_PULL_REQUEST"));
-			githubConnector.setRepositoryLocalPath(propConnections.getProperty("REPOSITORY_LOCAL_PATH"));
+			githubConnector.setPullRequest(propConnections.getProperty("EVOLUTION_PULL_REQUEST"));
+			githubConnector.setEvolutionLocalPath(propConnections.getProperty("EVOLUTION_REPO_LOCAL_PATH"));
 		}
 		return connector;
 	}
