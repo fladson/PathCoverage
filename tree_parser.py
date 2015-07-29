@@ -10,6 +10,7 @@ def build_tree(lines, query):
     lines = iter(lines)
     stack = []
     count = 0
+
     for line in lines:
         indent = len(list(takewhile(is_tab, line)))
         stack[indent:] = [line.replace(">","")]

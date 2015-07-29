@@ -101,7 +101,7 @@ public class GithubConnector extends EvolutionConnector {
 				List<String> changedFilesInRevision = getFilesOfRevision(commit);
 				System.out.println("\t Searching changed methods on commit: "+ commit.substring(0, 7));
 				this.changedFiles = new ArrayList<String>();
-				System.out.println("\tModified Files: ");
+				System.out.println("\t-|Modified Files: ");
 				for (String file : changedFilesInRevision) {
 					changedLines = new ArrayList<UpdatedLine>();
 					sourceCode = new StringBuilder();
@@ -114,12 +114,12 @@ public class GithubConnector extends EvolutionConnector {
 					changedMethods.add(builder.filterChangedMethods(changedLines));
 				}
 			}
-			System.out.println("Metodos modificados: ");
+			System.out.println("\t-|Modified Methods: ");
 			for (Collection<UpdatedMethod> collection : changedMethods) {
 				for (UpdatedMethod method : collection) {
 					changedMethodsString.add(method.getKlass() + "."
 							+ method.getMethodLimit().getSignature());
-					System.out.println(method.getKlass() + "."
+					System.out.println("\t\t" + method.getKlass() + "."
 							+ method.getMethodLimit().getSignature());
 				}
 			}
@@ -150,6 +150,7 @@ public class GithubConnector extends EvolutionConnector {
 				if (this.startVersion.equals(this.endVersion)) {
 					commitsOnRangeString.add(this.startVersion);
 				} else {
+					commitsOnRangeString.add(this.startVersion);
 					List<RepositoryCommit> log = commitService.getCommits(repository, branch, null);
 					List<String> commitsString = new ArrayList<String>();
 					List<Integer> commitsOnRange = new ArrayList<Integer>();
@@ -205,7 +206,10 @@ public class GithubConnector extends EvolutionConnector {
 		try {
 			Process p = Runtime.getRuntime().exec(command, null, new File(this.evolutionLocalPath));
 			BufferedReader bf = new BufferedReader(new InputStreamReader(p.getInputStream()));
-
+			if(bf.readLine() == null){
+				System.out.println("\t\t!!! EMPTY GIT BLAME  !!! Try: " + command);
+				return;
+			}
 			String line = null;
 			while ((line = bf.readLine()) != null) {
 				UpdatedLine up = handleLine(line, filename);

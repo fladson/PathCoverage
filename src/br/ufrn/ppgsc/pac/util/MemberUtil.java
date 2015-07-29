@@ -1,12 +1,12 @@
 package br.ufrn.ppgsc.pac.util;
 
+import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
-/* TODO: Ver como juntar esses métodos com os outros de assinatura
- * sem gerar problemas com as dependências do classpath
- */
 public abstract class MemberUtil {
 
 	public static String getStandartMethodSignature(Member member) {
@@ -38,4 +38,13 @@ public abstract class MemberUtil {
 		return result.toString();
 	}
 
+	public static int getPathCountFromFile(String file) throws IOException{
+		int count = 0;
+		for (String line : Files.readAllLines(Paths.get(file))) {
+			if(!line.startsWith(">") && !line.contains("Scenario: Entry point")){
+				count++;
+			}
+		}
+		return count;
+	}
 }
