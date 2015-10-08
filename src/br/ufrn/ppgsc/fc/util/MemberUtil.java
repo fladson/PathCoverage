@@ -1,4 +1,4 @@
-package br.ufrn.ppgsc.pac.util;
+package br.ufrn.ppgsc.fc.util;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;

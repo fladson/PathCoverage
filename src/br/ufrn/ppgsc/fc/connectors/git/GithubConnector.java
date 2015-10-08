@@ -10,7 +10,7 @@
  * @since 20/03/2015
  *
  */
-package br.ufrn.ppgsc.pac.connectors.git;
+package br.ufrn.ppgsc.fc.connectors.git;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -36,10 +36,10 @@ import org.eclipse.egit.github.core.service.RepositoryService;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 
-import br.ufrn.ppgsc.pac.connectors.EvolutionConnector;
-import br.ufrn.ppgsc.pac.jdt.MethodLimitBuilder;
-import br.ufrn.ppgsc.pac.model.UpdatedLine;
-import br.ufrn.ppgsc.pac.model.UpdatedMethod;
+import br.ufrn.ppgsc.fc.connectors.EvolutionConnector;
+import br.ufrn.ppgsc.fc.jdt.MethodLimitBuilder;
+import br.ufrn.ppgsc.fc.jdt.UpdatedLine;
+import br.ufrn.ppgsc.fc.jdt.UpdatedMethod;
 
 /**
  * UNIVERSIDADE FEDERAL DO RIO GRANDE DO NORTE - UFRN

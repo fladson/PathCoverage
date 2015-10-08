@@ -1,12 +1,12 @@
-package br.ufrn.ppgsc.pac.connectors;
+package br.ufrn.ppgsc.fc.connectors;
 
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Properties;
 
-import br.ufrn.ppgsc.pac.connectors.git.GitConnector;
-import br.ufrn.ppgsc.pac.connectors.git.GithubConnector;
-import br.ufrn.ppgsc.pac.util.PropertiesUtil;
+import br.ufrn.ppgsc.fc.connectors.git.GitConnector;
+import br.ufrn.ppgsc.fc.connectors.git.GithubConnector;
+import br.ufrn.ppgsc.fc.util.PropertiesUtil;
 
 /**
  * UNIVERSIDADE FEDERAL DO RIO GRANDE DO NORTE - UFRN

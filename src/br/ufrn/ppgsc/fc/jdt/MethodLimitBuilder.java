@@ -1,4 +1,4 @@
-package br.ufrn.ppgsc.pac.jdt;
+package br.ufrn.ppgsc.fc.jdt;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -12,10 +12,6 @@ import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
-
-import br.ufrn.ppgsc.pac.model.MethodLimit;
-import br.ufrn.ppgsc.pac.model.UpdatedLine;
-import br.ufrn.ppgsc.pac.model.UpdatedMethod;
 
 public class MethodLimitBuilder {
 	

@@ -25,8 +25,8 @@
 	    <property name="hibernate.order_inserts">true</property>
 	    <property name="hibernate.order_updates">true</property>
 
-		<mapping class="br.ufrn.ppgsc.pac.model.RuntimeScenario" />
-		<mapping class="br.ufrn.ppgsc.pac.model.RuntimeNode" />
+		<mapping class="br.ufrn.ppgsc.fc.model.RuntimeScenario" />
+		<mapping class="br.ufrn.ppgsc.fc.model.RuntimeNode" />
 
 	</session-factory>
 

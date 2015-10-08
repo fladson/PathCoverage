@@ -1,4 +1,4 @@
-package br.ufrn.ppgsc.pac.model;
+package br.ufrn.ppgsc.fc.model;
 
 import java.io.Serializable;
 import java.lang.reflect.Constructor;
@@ -22,7 +22,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
 
-import br.ufrn.ppgsc.pac.util.MemberUtil;
+import br.ufrn.ppgsc.fc.util.MemberUtil;
 
 
 @Entity(name = "node")

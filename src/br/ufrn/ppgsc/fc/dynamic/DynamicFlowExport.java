@@ -1,15 +1,15 @@
-package br.ufrn.ppgsc.pac.util;
+package br.ufrn.ppgsc.fc.dynamic;
 
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.Set;
 
-import br.ufrn.ppgsc.pac.model.Node;
-import br.ufrn.ppgsc.pac.model.RuntimeNode;
-import br.ufrn.ppgsc.pac.model.RuntimeScenario;
+import br.ufrn.ppgsc.fc.model.Node;
+import br.ufrn.ppgsc.fc.model.RuntimeNode;
+import br.ufrn.ppgsc.fc.model.RuntimeScenario;
 
 
-public abstract class RuntimeCallGraphPrintUtil {
+public abstract class DynamicFlowExport {
 	
 	public static void printScenarioTree(RuntimeScenario tree, Appendable buffer) throws IOException {
 		buffer.append("Scenario: " + tree.getName());

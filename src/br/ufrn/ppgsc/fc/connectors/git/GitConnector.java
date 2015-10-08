@@ -1,4 +1,4 @@
-package br.ufrn.ppgsc.pac.connectors.git;
+package br.ufrn.ppgsc.fc.connectors.git;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,8 +18,8 @@ import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 
-import br.ufrn.ppgsc.pac.connectors.EvolutionConnector;
-import br.ufrn.ppgsc.pac.connectors.SCMConnector;
+import br.ufrn.ppgsc.fc.connectors.EvolutionConnector;
+import br.ufrn.ppgsc.fc.connectors.SCMConnector;
 
 public class GitConnector extends SCMConnector {
 	

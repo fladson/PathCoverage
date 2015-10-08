@@ -1,9 +1,9 @@
-package br.ufrn.ppgsc.pac.connectors;
+package br.ufrn.ppgsc.fc.connectors;
 
 import java.util.Collection;
 import java.util.List;
 
-import br.ufrn.ppgsc.pac.model.UpdatedMethod;
+import br.ufrn.ppgsc.fc.jdt.UpdatedMethod;
 
 
 /**

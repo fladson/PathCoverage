@@ -1,4 +1,4 @@
-package br.ufrn.ppgsc.pac.util;
+package br.ufrn.ppgsc.fc.jdt;
 
 import java.io.FileWriter;
 import java.io.IOException;

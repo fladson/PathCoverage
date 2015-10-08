@@ -10,7 +10,7 @@
  * @since 25/03/2015
  *
  */
-package br.ufrn.ppgsc.pac.util;
+package br.ufrn.ppgsc.fc.util;
 
 import java.io.FileInputStream;
 import java.io.IOException;

@@ -1,4 +1,4 @@
-package br.ufrn.ppgsc.pac.model;
+package br.ufrn.ppgsc.fc.model;
 
 import java.util.Collections;
 import java.util.List;

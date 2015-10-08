@@ -1,4 +1,4 @@
-package br.ufrn.ppgsc.pac;
+package br.ufrn.ppgsc.fc.main;
 
 import java.io.File;
 import java.io.FileReader;
@@ -11,19 +11,20 @@ import java.util.logging.Level;
 
 import com.ibm.wala.shrikeCT.InvalidClassFileException;
 
-import br.ufrn.ppgsc.pac.connectors.EvolutionConnector;
-import br.ufrn.ppgsc.pac.connectors.ConnectorFactory;
-import br.ufrn.ppgsc.pac.connectors.SCMConnector;
-import br.ufrn.ppgsc.pac.db.DatabaseService;
-import br.ufrn.ppgsc.pac.db.GenericDAO;
-import br.ufrn.ppgsc.pac.db.PostgreSQLJDBC;
-import br.ufrn.ppgsc.pac.model.Node;
-import br.ufrn.ppgsc.pac.model.RuntimeScenario;
-import br.ufrn.ppgsc.pac.util.ChangedMethodUtil;
-import br.ufrn.ppgsc.pac.util.MemberUtil;
-import br.ufrn.ppgsc.pac.util.PropertiesUtil;
-import br.ufrn.ppgsc.pac.util.RuntimeCallGraphPrintUtil;
-import br.ufrn.ppgsc.pac.wala.CallGraphWALA;
+import br.ufrn.ppgsc.fc.connectors.ConnectorFactory;
+import br.ufrn.ppgsc.fc.connectors.EvolutionConnector;
+import br.ufrn.ppgsc.fc.connectors.SCMConnector;
+import br.ufrn.ppgsc.fc.database.DatabaseService;
+import br.ufrn.ppgsc.fc.database.GenericDAO;
+import br.ufrn.ppgsc.fc.database.PostgreSQLJDBC;
+import br.ufrn.ppgsc.fc.dynamic.DynamicFlowExport;
+import br.ufrn.ppgsc.fc.graph_analysis.GraphAnalysis;
+import br.ufrn.ppgsc.fc.jdt.ChangedMethodUtil;
+import br.ufrn.ppgsc.fc.model.Node;
+import br.ufrn.ppgsc.fc.model.RuntimeScenario;
+import br.ufrn.ppgsc.fc.util.MemberUtil;
+import br.ufrn.ppgsc.fc.util.PropertiesUtil;
+import br.ufrn.ppgsc.fc.wala.CallGraphWALA;
 
 public class Main {
 	public static void main(String[] args) throws Exception {
@@ -49,7 +50,7 @@ public class Main {
 			List<RuntimeScenario> scenarios = dao.readAll(RuntimeScenario.class);
 			Appendable buffer = new StringBuffer();
 			for (RuntimeScenario runtimeScenario : scenarios) {
-				RuntimeCallGraphPrintUtil.printScenarioTree(runtimeScenario, buffer);
+				DynamicFlowExport.printScenarioTree(runtimeScenario, buffer);
 			}
 			FileWriter out = new FileWriter("coveredPaths.txt");;
 			out.write(buffer.toString());
@@ -85,6 +86,8 @@ public class Main {
 				Runtime.getRuntime().exec("python tree_parser.py", null, new File(System.getProperty("user.dir")));
 			}
 		}
+		
+		GraphAnalysis.analyseGraphsfromTextFile("", "", "");
 		
 //		System.out.println("-| Result");
 //		for (String line : Files.readAllLines(Paths.get("resultado.txt"))) {

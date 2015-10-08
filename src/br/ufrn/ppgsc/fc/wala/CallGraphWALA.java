@@ -1,16 +1,16 @@
-package br.ufrn.ppgsc.pac.wala;
+package br.ufrn.ppgsc.fc.wala;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.jar.JarFile;
-
-import br.ufrn.ppgsc.pac.util.PropertiesUtil;
 
 import com.ibm.wala.classLoader.BinaryDirectoryTreeModule;
 import com.ibm.wala.classLoader.CallSiteReference;
@@ -18,23 +18,22 @@ import com.ibm.wala.classLoader.IClass;
 import com.ibm.wala.classLoader.IMethod;
 import com.ibm.wala.core.tests.callGraph.CallGraphTestUtil;
 import com.ibm.wala.examples.drivers.PDFTypeHierarchy;
-import com.ibm.wala.ide.ui.SWTTreeViewer;
 import com.ibm.wala.ipa.callgraph.AnalysisCache;
 import com.ibm.wala.ipa.callgraph.AnalysisOptions;
 import com.ibm.wala.ipa.callgraph.AnalysisScope;
 import com.ibm.wala.ipa.callgraph.CGNode;
 import com.ibm.wala.ipa.callgraph.CallGraph;
+import com.ibm.wala.ipa.callgraph.CallGraphBuilder;
 import com.ibm.wala.ipa.callgraph.CallGraphBuilderCancelException;
-import com.ibm.wala.ipa.callgraph.CallGraphStats;
+import com.ibm.wala.ipa.callgraph.Context;
 import com.ibm.wala.ipa.callgraph.Entrypoint;
 import com.ibm.wala.ipa.callgraph.impl.AllApplicationEntrypoints;
 import com.ibm.wala.ipa.callgraph.impl.DefaultContextSelector;
 import com.ibm.wala.ipa.callgraph.impl.DefaultEntrypoint;
 import com.ibm.wala.ipa.callgraph.impl.Util;
 import com.ibm.wala.ipa.callgraph.propagation.LocalPointerKey;
-import com.ibm.wala.ipa.callgraph.propagation.SSAPropagationCallGraphBuilder;
 import com.ibm.wala.ipa.callgraph.propagation.PropagationCallGraphBuilder;
-import com.ibm.wala.ipa.callgraph.propagation.cfa.ContainerContextSelector;
+import com.ibm.wala.ipa.callgraph.propagation.SSAPropagationCallGraphBuilder;
 import com.ibm.wala.ipa.cha.ClassHierarchy;
 import com.ibm.wala.ipa.cha.ClassHierarchyException;
 import com.ibm.wala.ipa.cha.IClassHierarchy;
@@ -46,30 +45,32 @@ import com.ibm.wala.util.WalaException;
 import com.ibm.wala.util.collections.HashSetFactory;
 import com.ibm.wala.util.collections.NonNullSingletonIterator;
 import com.ibm.wala.util.config.AnalysisScopeReader;
-import com.ibm.wala.util.config.SetOfClasses;
 import com.ibm.wala.util.debug.Assertions;
 import com.ibm.wala.util.graph.Graph;
+import com.ibm.wala.util.graph.GraphIntegrity;
+import com.ibm.wala.util.graph.GraphIntegrity.UnsoundGraphException;
 import com.ibm.wala.util.graph.GraphPrint;
-import com.ibm.wala.util.graph.InferGraphRoots;
-import com.ibm.wala.util.graph.impl.SlowSparseNumberedGraph;
 import com.ibm.wala.util.graph.traverse.DFS;
+import com.ibm.wala.util.graph.traverse.DFSAllPathsFinder;
 import com.ibm.wala.util.strings.Atom;
-import com.ibm.wala.viz.DotUtil;
 
 public class CallGraphWALA {
 
 	private CallGraph cg = null;
 	private AnalysisScope analysisScope = null;
 	private ClassHierarchy classHierarchy = null;
-	private final static String PDF_FILE = "cg.pdf";
 	protected Graph<CGNode> graph_pruned = null;
 	FileWriter out = null;
 	protected String node_string = "node";
 	protected String previous_node_string = "previous";
 	protected StringBuffer buffer = new StringBuffer();
 
-	public void saveWalaCallGraphToFile(String application) throws UnsupportedOperationException,
-			InvalidClassFileException, ClassHierarchyException {
+	public LinkedHashMap<String, ArrayList<String>> nodes;
+	private Set<String> cgset;
+
+	public void saveWalaCallGraphToFile(String application)
+			throws UnsupportedOperationException, InvalidClassFileException,
+			ClassHierarchyException {
 		if (cg == null) {
 			try {
 				System.out.println("-|Initializing WALA CallGraph...");
@@ -78,106 +79,201 @@ public class CallGraphWALA {
 
 				Iterable<Entrypoint> entrypoints = null;
 				System.out.println("  -|Getting EntryPoints...");
-				entrypoints = Util.makeMainEntrypoints(this.analysisScope,this.classHierarchy);
+				entrypoints = Util.makeMainEntrypoints(this.analysisScope,
+						this.classHierarchy);
 				if (!entrypoints.iterator().hasNext()) {
 					// Demostenes Metodo
-//					entrypoints = makeLibraryEntrypoints(analysisScope,classHierarchy);
-					// WAlA Metodo
-					entrypoints = new AllApplicationEntrypoints(analysisScope,classHierarchy);
+					// entrypoints =
+					// makeLibraryEntrypoints(analysisScope,classHierarchy);
+					// Metodo WAlA para gerar entrypoints da aplicação
+					entrypoints = new AllApplicationEntrypoints(analysisScope,
+							classHierarchy);
 				}
 
-				AnalysisOptions options = new AnalysisOptions(this.analysisScope, entrypoints);
-				// AnalysisCache cache = new AnalysisCache();
-				
-//				options.setReflectionOptions(AnalysisOptions.ReflectionOptions.FULL);
+				AnalysisOptions options = new AnalysisOptions(
+						this.analysisScope, entrypoints);
+
+				// options.setReflectionOptions(AnalysisOptions.ReflectionOptions.FULL);
 				options.setReflectionOptions(AnalysisOptions.ReflectionOptions.NONE);
 
-//				SSAPropagationCallGraphBuilder builder = null;
-				PropagationCallGraphBuilder builder = null;
+//				 SSAPropagationCallGraphBuilder builder = null;
+//				PropagationCallGraphBuilder builder = null;
+				CallGraphBuilder builder = null;
 
 				IClassHierarchy cha = this.classHierarchy;
 				AnalysisScope scope = this.analysisScope;
 
-				builder = Util.makeZeroCFABuilder(options, new AnalysisCache(), cha, scope, null, null);
-				
+				/*
+				 * opcoes: makeRTABuilder = Rapid Type Analysis
+				 * makeZeroCFABuilder = context-insensitive, class-based heap
+				 * makeZeroOneCFABuilder = context-insensitive, allocation-site-based heap 
+				 * makeZeroOneContainerCFABuilder = 0-1-CFA with object-sensitive containers
+				 * 
+				 * makeZeroContainerCFABuilder = 0-CFA Call Graph Builder augmented with extra logic for containers 
+				 * makeNCFABuilder =uses call-string context sensitivity, with call-string length limited to n, and a context-sensitive allocation-site-based
+				 * heap abstraction.
+				 * 
+				 * makeVanillaZeroOneCFABuilder
+				 * makeVanillaZeroOneContainerCFABuilder 
+				 * makeVanillaNCFABuilder
+				 */
+				builder = Util.makeRTABuilder(options,
+						new AnalysisCache(), cha, scope);
+
 				// Adicionei para tentar resolver a recursao
-//				System.out.println("Context Selector: " + builder.getContextSelector());
-//				DefaultContextSelector contextSelector = new DefaultContextSelector(options, cha);
-//				builder.setContextSelector(contextSelector);
-				
-				
-				if(!entrypoints.iterator().hasNext()){
-					System.out.println("  -|Nao foi possivel gerar um entrypoint para o sistema");
+				// System.out.println("Context Selector: " +
+				// builder.getContextSelector());
+				// DefaultContextSelector contextSelector = new
+				// DefaultContextSelector(options, cha);
+				// builder.setContextSelector(contextSelector);
+
+				if (!entrypoints.iterator().hasNext()) {
+					System.out
+							.println("  -|Nao foi possivel gerar um entrypoint para o sistema");
 					return;
 				}
-				
+
 				System.out.println("  -|CallGraph is being created.");
 				this.cg = builder.makeCallGraph(options, null);
 				System.out.println("  -|CallGraph created.");
-				
+
 				out = new FileWriter("callEntries.txt");
 
-				System.out.println("    -|Filtering the application nodes" );
+				System.out.println("    -|Filtering the application nodes");
 				Collection<CGNode> entries = cg.getEntrypointNodes();
-				
-//				System.out.println("CALL ENTRIES: " + entries.size());
-				
-				
-				// PDF OUTPUT
-//				Graph<CGNode> graph_pruned = pruneForAppLoader(cg);
-//				String pdfFile = "/Volumes/Beta/Mestrado/workspace_luna" + File.separatorChar + PDF_FILE;
-//				String dotExe = "/usr/local/bin/dot";
-//				DotUtil.dotify(graph_pruned, null, PDFTypeHierarchy.DOT_FILE,pdfFile, dotExe);
-				// PDF OUTPUT
-				
-//				out.write(callGraphToString(cg,cg.getFakeRootNode()));
-//				out.write(GraphPrint.genericToString(graph_pruned));
+
+				System.out.println("\tENTRY POINTS: " + entries.size());
+
+				try {
+					GraphIntegrity.check(cg);
+				} catch (UnsoundGraphException e) {
+					e.printStackTrace();
+				}
+				// DFSAllPathsFinder<String> paths = makeFinder((CallGraph)cg,
+				// "A", "L");
+				//
 				printNodes(cg);
-//				for ( Iterator<CGNode> i = entries.iterator() ; i.hasNext() ;)
-//				{			
-//					CGNode entrypoint = i.next();
-////					previous_node_string = buffer.toString();
-//					
-////					buffer = new StringBuffer();
-////					System.out.println("ENTRIE: " + getStandartMethodSignature(entrypoint.getMethod()));
-//					printCallGraphNode(cg, entrypoint, 0);
-////					node_string = buffer.toString();
-//				}
+//				out.write("=========================================" + "\n");
 				
-				System.out.println("    -|Application entries saved to file: callEntries.txt" );	
+//				printCallGraph(cg,cg.getFakeRootNode(),0);
+				
+
+
+				System.out
+						.println("    -|Application entries saved to file: callEntries.txt");
 				out.close();
-			} catch (IOException | WalaException | IllegalArgumentException | CallGraphBuilderCancelException e) {
+			} catch (IOException | WalaException | IllegalArgumentException
+					| CallGraphBuilderCancelException e) {
 				e.printStackTrace();
 			}
 		}
 	}
-	
-	/*
-	 * Metodo que captura entrie points de metodos publicos e protegidos
-	 * So e executado se o projeto nao possuir um Main como ponto de entrada
-	 */
-	private Iterable<Entrypoint> makeLibraryEntrypoints(AnalysisScope scope,
-			IClassHierarchy cha) {
-		if (cha == null) {
-			throw new IllegalArgumentException("cha is null");
+
+	private void printCallGraph(CallGraph cg, CGNode currentNode, int level) throws IOException {
+		String indent = "";
+		for (int i = 0; i < level; i++) {
+			indent += ">";
 		}
-		final HashSet<Entrypoint> entryPoints = HashSetFactory.make();
-//		int classCount = 0;
-		for (IClass klass : cha) {
-//			classCount++;
-//			System.out.println(classCount + ": " +  klass + " | " + klass.getDeclaredMethods().size());
-			if (scope.isApplicationLoader(klass.getClassLoader())){
-				for (IMethod m : klass.getDeclaredMethods()) {
-//					System.out.println("\t"+m);
-					if (m.isPublic() || m.isProtected()) {
-						entryPoints.add(new DefaultEntrypoint(m, cha));
+		if (level == 0)
+			this.cgset = new HashSet<String>();
+
+		String methodSig = getStandartMethodSignature(currentNode.getMethod());
+		out.write(indent + methodSig+"\n");
+//		System.out.println(indent + methodSig);
+
+		this.cgset.add(methodSig);
+
+		IClassHierarchy cha = cg.getClassHierarchy();
+		Iterator<CallSiteReference> callsiteIter = currentNode
+				.iterateCallSites();
+
+		while (callsiteIter.hasNext()) {
+			CallSiteReference callsite = callsiteIter.next();
+			IMethod calledMethod = cha.resolveMethod(callsite
+					.getDeclaredTarget());
+
+			if (cg.getPossibleTargets(currentNode, callsite).isEmpty()) {
+				methodSig = callsite.getDeclaredTarget().getSignature();
+				out.write(indent + ">" + methodSig+"\n");
+//				System.out.println(indent + ">" + methodSig);
+			} else {
+				for (CGNode targetNode : cg.getPossibleTargets(currentNode,callsite)) {
+					methodSig = getStandartMethodSignature(targetNode.getMethod());
+					if (targetNode.getMethod().getDeclaringClass()
+							.getClassLoader().getReference()
+							.equals(ClassLoaderReference.Application)
+							&& !this.cgset.contains(methodSig)) {
+						printCallGraph(cg, targetNode, level + 1);
+					} else {
+						out.write(indent + ">" + methodSig+"\n");
+//						System.out.println(indent + ">" + methodSig);
 					}
 				}
-			}else{
-				continue;
 			}
 		}
-		return entryPoints;
+	}
+
+	private static boolean valid(String sig) {
+		return !((sig.startsWith("java.") || sig.startsWith("com.ibm")
+				|| sig.startsWith("javax.")
+				|| sig.startsWith("java.lang.StringBuilder.") || sig
+					.startsWith("org.junit")));
+
+	}
+
+	private void fromCG(CallGraph cg) {
+		Iterator<CGNode> it = cg.iterator();
+		while (it.hasNext()) {
+			CGNode node = it.next();
+			Context x = node.getContext();
+			String sig = getStandartMethodSignature(node.getMethod());
+			if (!valid(sig))
+				continue;
+			ArrayList<String> arr = new ArrayList<String>();
+			Iterator<CallSiteReference> it2 = node.iterateCallSites();
+			while (it2.hasNext()) {
+				CallSiteReference ref = it2.next();
+				String adjSig = ref.getDeclaredTarget().getSignature();
+				if (!valid(adjSig))
+					continue;
+				arr.add(adjSig);
+			}
+			this.nodes.put(sig, arr);
+		}
+	}
+
+	private void cgStringToFile() throws IOException {
+		Set<String> set = this.nodes.keySet();
+		for (String no : set) {
+			out.write(no + "\n");
+			ArrayList<String> edges = this.nodes.get(no);
+			if (!edges.isEmpty()) {
+				// str += "Edges to:";
+				for (int i = 1; i < edges.size(); i++) {
+					printLevelTabs(i);
+					out.write(edges.get(i) + "\n");
+				}
+			}
+		}
+	}
+
+	public String CGtoString() {
+		String str = "";
+		Set<String> set = this.nodes.keySet();
+		for (String no : set) {
+			str += "[Node: " + no + "]\n    ";
+			ArrayList<String> edges = this.nodes.get(no);
+			if (edges.isEmpty())
+				str += "Has no output edges";
+			else {
+				str += "Edges to:";
+				for (String e : edges) {
+					str += " [" + e + "]";
+				}
+			}
+			str += "\n";
+		}
+		return str;
 	}
 
 	private static void addClassPathToScope(String classPath,
@@ -230,152 +326,61 @@ public class CallGraphWALA {
 
 	private void loadAnalysisScope(String application_path) throws IOException {
 		System.out.println("  -|Loading analysis scope...");
-		this.analysisScope = AnalysisScopeReader.makeJavaBinaryAnalysisScope(application_path, new File(CallGraphTestUtil.REGRESSION_EXCLUSIONS));
-//		analysisScope.addToScope(ClassLoaderReference.Primordial,new JarFile(PropertiesUtil.getPropertieValueOf("config", "PRIMORDIAL_LIB")));
+		this.analysisScope = AnalysisScopeReader.makeJavaBinaryAnalysisScope(
+				application_path, new File(
+						CallGraphTestUtil.REGRESSION_EXCLUSIONS));
+		// analysisScope.addToScope(ClassLoaderReference.Primordial,new
+		// JarFile(PropertiesUtil.getPropertieValueOf("config",
+		// "PRIMORDIAL_LIB")));
 		
-		analysisScope.addToScope (
-				CallGraphTestUtil.makeJ2SEAnalysisScope("/Users/fladson/git/PathCoverage/src/properties/primordial.txt",
-						(System.getProperty("os.name").equals("Mac OS X"))?
-		          "/Users/fladson/git/PathCoverage/src/properties/Java60RegressionExclusions.txt":
-		          "/Users/fladson/git/PathCoverage/src/properties/GUIExclusions.txt"));
-		
-		ClassLoaderReference loader = analysisScope.getLoader(AnalysisScope.APPLICATION);
+		analysisScope.addToScope(CallGraphTestUtil
+						.makeJ2SEAnalysisScope(
+								"/Users/fladson/git/PathCoverage/src/properties/primordial.txt","/Users/fladson/git/PathCoverage/src/properties/applicationExclusions.txt"));
+
+		ClassLoaderReference loader = analysisScope
+				.getLoader(AnalysisScope.APPLICATION);
 		addClassPathToScope(application_path, analysisScope, loader);
 	}
+	
 
 	private void loadClassHierarchy() throws ClassHierarchyException {
 		System.out.println("  -|Loading class hierarchy...");
 		this.classHierarchy = ClassHierarchy.make(this.analysisScope);
 	}
 
-	/**
-	 * Classe que representa os metogos da aplicao para filtragem, e geracao do pdf com os nodes
-	 * So e usado para gerar a representacao do grafo para um documento pdf
-	 * Retirado de PDFCallGraph.java
-	 * 
-	 * @author fladson
-	 *
-	 */
-	private static class ApplicationLoaderFilter extends Predicate<CGNode> {
-		@Override
-		public boolean test(CGNode o) {
-			if (o instanceof CGNode) {
-				CGNode n = (CGNode) o;
-				return n.getMethod().getDeclaringClass().getClassLoader()
-						.getReference()
-						.equals(ClassLoaderReference.Application);
-			} else if (o instanceof LocalPointerKey) {
-				LocalPointerKey l = (LocalPointerKey) o;
-				return test(l.getNode());
-			} else {
-				return false;
-			}
-		}
-	}
-
-	private static Graph<CGNode> pruneForAppLoader(CallGraph g)
-			throws WalaException {
-		return PDFTypeHierarchy.pruneGraph(g, new ApplicationLoaderFilter());
-	}
-	
-	public String callGraphToString(CallGraph cg, CGNode fakeRootNode) throws IOException {
-	    StringBuffer result = new StringBuffer("");
-	    for (Iterator i = DFS.iterateDiscoverTime(cg, new NonNullSingletonIterator<CGNode>(fakeRootNode)); i.hasNext();) {
-	      CGNode n = (CGNode) i.next();
-	      printCallGraphNode(cg, n, 0);
-	      
-//	      if (getAtomLoaderReference(n) != AnalysisScope.PRIMORDIAL) {
-	    	  
-//	    	  
-//	    	  result.append(getStandartMethodSignature(n.getMethod())+"\n");
-//		      if (n.getMethod() != null) {
-//		        for (Iterator sites = n.iterateCallSites(); sites.hasNext();) {
-//		          CallSiteReference site = (CallSiteReference) sites.next();
-//		          Iterator targets = cg.getPossibleTargets(n, site).iterator();
-//		          if (targets.hasNext()) {
-////		            result.append(" - " + site + "\n");
-//		          }
-//		          for (; targets.hasNext();) {
-//		            CGNode target = (CGNode) targets.next();
-//		            result.append("     -> " + getStandartMethodSignature(target.getMethod()) + "\n");
-//		          }
-//		        }
-//		      }
-//	      }
-	      
-	    }
-	    return result.toString();
-	  }
-
-	CGNode previous;
-	String method;
-	private void printCallGraphNode(CallGraph cg, CGNode currNode, int level) throws IOException {
-//		if(previous!= null && previous.equals(currNode)){
-//			return;
-//		}
-//		if(level == 0){
-//			
-//		}
-		if(level>20){
-			out.write("ˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆRECURSAOˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆ\n");
-			return;
-		}
-		if (getAtomLoaderReference(currNode) != AnalysisScope.PRIMORDIAL) {
-			
-			printLevelTabs(level);
-			method = getStandartMethodSignature(currNode.getMethod());
-			out.write(method +"\n");
-//			buffer.append(method+"\n");
-			
-//			System.out.println(getStandartMethodSignature(currNode.getMethod()));
-//			previous = currNode;
-			for (Iterator<CGNode> sucessores = cg.getSuccNodes(currNode); sucessores.hasNext();) {
-				printCallGraphNode(cg, sucessores.next(), level + 1);
-			}
-		}
-	}
-	
-	private void printLevelTabs(int level) throws IOException {
-		for (int i = 0; i < level; i++){
-//			System.out.print(">");
-//			buffer.append(">");
-			out.write(">");
-		}
-	}
-	
-	public  void printNodes(CallGraph cg) throws IOException {
-		for (Iterator<CGNode> it = cg.getSuccNodes(cg.getFakeRootNode()); it.hasNext();)
+	public void printNodes(CallGraph cg) throws IOException {
+		for (Iterator<CGNode> it = cg.getSuccNodes(cg.getFakeRootNode()); it
+				.hasNext();)
 			printNodes(cg, it.next(), new HashSet<CGNode>(), 0);
 	}
 
-	private  void printNodes(CallGraph cg, CGNode root, Set<CGNode> visited, int level) throws IOException {
-		if (root.getMethod().getDeclaringClass().getClassLoader().toString().equals("Primordial"))
+	private void printNodes(CallGraph cg, CGNode root, Set<CGNode> visited,
+			int level) throws IOException {
+		if (root.getMethod().getDeclaringClass().getClassLoader().toString()
+				.equals("Primordial"))
 			return;
 
 		if (visited.contains(root)) {
 			printLevelTabs(level);
-			out.write("[*]" + getStandartMethodSignature(root.getMethod())+"\n");
-//			System.out.println(str + "[*]" + root.getMethod().getSignature());
+			out.write("[*]" + getStandartMethodSignature(root.getMethod())
+					+ "\n");
+			// System.out.println(str + "[*]" +
+			// root.getMethod().getSignature());
 			return;
-		} else{
+		} else {
 			printLevelTabs(level);
-			out.write(getStandartMethodSignature(root.getMethod())+"\n");
-//			System.out.println(str + root.getMethod().getSignature());
+			out.write(getStandartMethodSignature(root.getMethod()) + "\n");
+			// System.out.println(str + root.getMethod().getSignature());
 		}
 
 		visited.add(root);
 
-		for (Iterator<CallSiteReference> it = root.iterateCallSites(); it.hasNext();)
+		for (Iterator<CallSiteReference> it = root.iterateCallSites(); it
+				.hasNext();)
 			for (CGNode cgNode : cg.getPossibleTargets(root, it.next()))
-				printNodes(cg, cgNode, visited, level+1);
+				printNodes(cg, cgNode, visited, level + 1);
 
 		visited.remove(root);
-	}
-
-
-	private Atom getAtomLoaderReference(CGNode node) {
-		return node.getMethod().getReference().getDeclaringClass()
-				.getClassLoader().getName();
 	}
 
 	/*
@@ -419,6 +424,12 @@ public class CallGraphWALA {
 		return result + ")";
 	}
 
+	private void printLevelTabs(int level) throws IOException {
+		for (int i = 0; i < level; i++) {
+			out.write(">");
+		}
+	}
+
 	private static String convertTypeSignatureToName(String type) {
 		switch (type) {
 		case "Z":
@@ -442,30 +453,5 @@ public class CallGraphWALA {
 		default:
 			return type;
 		}
-	}
-	
-	private void printMethods() {
-		for (IClass cl : this.classHierarchy) {
-			if (cl.getClassLoader().getReference()
-					.equals(ClassLoaderReference.Application)) {
-				for (IMethod m : cl.getAllMethods()) {
-					if (!m.getReference().toString().contains("< Primordial,")) {
-						if (!m.getSignature().contains("Test")) {
-							if (!m.getSignature().contains(".test.")) {
-								System.out.println(getStandartMethodSignature(m));
-							}
-						}
-					}
-				}
-			}
-		}
-	}
-
-	public Graph<CGNode> getGrap_pruned() {
-		return graph_pruned;
-	}
-
-	public void setGrap_pruned(Graph<CGNode> grap_pruned) {
-		this.graph_pruned = grap_pruned;
 	}
 }

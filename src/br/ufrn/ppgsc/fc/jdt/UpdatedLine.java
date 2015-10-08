@@ -1,4 +1,4 @@
-package br.ufrn.ppgsc.pac.model;
+package br.ufrn.ppgsc.fc.jdt;
 
 import java.util.Collections;
 import java.util.Date;

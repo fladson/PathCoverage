@@ -1,4 +1,4 @@
-package br.ufrn.ppgsc.pac.db;
+package br.ufrn.ppgsc.fc.database;
 
 import java.io.Serializable;
 import java.util.Iterator;

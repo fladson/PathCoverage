@@ -1,4 +1,4 @@
-package br.ufrn.ppgsc.pac.db;
+package br.ufrn.ppgsc.fc.database;
 
 import java.io.IOException;
 import java.sql.Connection;
@@ -12,7 +12,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import br.ufrn.ppgsc.pac.model.Node;
+import br.ufrn.ppgsc.fc.model.Node;
 
 public class PostgreSQLJDBC {
 

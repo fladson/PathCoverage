@@ -1,4 +1,4 @@
-package br.ufrn.ppgsc.pac.connectors;
+package br.ufrn.ppgsc.fc.connectors;
 
 import java.util.List;
 
