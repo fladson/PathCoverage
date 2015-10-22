@@ -5,13 +5,17 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.jar.JarFile;
 
+import com.ibm.wala.analysis.reflection.java7.MethodHandles;
+import com.ibm.wala.analysis.typeInference.TypeInference;
 import com.ibm.wala.classLoader.BinaryDirectoryTreeModule;
 import com.ibm.wala.classLoader.CallSiteReference;
 import com.ibm.wala.classLoader.IClass;
@@ -34,6 +38,7 @@ import com.ibm.wala.ipa.callgraph.impl.Util;
 import com.ibm.wala.ipa.callgraph.propagation.LocalPointerKey;
 import com.ibm.wala.ipa.callgraph.propagation.PropagationCallGraphBuilder;
 import com.ibm.wala.ipa.callgraph.propagation.SSAPropagationCallGraphBuilder;
+import com.ibm.wala.ipa.callgraph.propagation.cfa.DelegatingSSAContextInterpreter;
 import com.ibm.wala.ipa.cha.ClassHierarchy;
 import com.ibm.wala.ipa.cha.ClassHierarchyException;
 import com.ibm.wala.ipa.cha.IClassHierarchy;
@@ -76,49 +81,106 @@ public class CallGraphWALA {
 				System.out.println("-|Initializing WALA CallGraph...");
 				loadAnalysisScope(application);
 				loadClassHierarchy();
-
-				Iterable<Entrypoint> entrypoints = null;
 				System.out.println("  -|Getting EntryPoints...");
-				entrypoints = Util.makeMainEntrypoints(this.analysisScope,
-						this.classHierarchy);
-				if (!entrypoints.iterator().hasNext()) {
-					// Demostenes Metodo
-					// entrypoints =
-					// makeLibraryEntrypoints(analysisScope,classHierarchy);
-					// Metodo WAlA para gerar entrypoints da aplicação
+				Iterable<Entrypoint> entrypoints = null;
+
+				HashSet<Entrypoint> entrypoints2 = null;
+				Map<String, String> sites = new HashMap<String, String>();
+				sites.put("GoogleCredentials", "getApplicationDefault");
+				if (sites.size() != 0) {
+					entrypoints2 = HashSetFactory.make();
+					for (IClass klass : this.classHierarchy) {
+						if (sites.size() != 0) {
+							if (!this.analysisScope.isApplicationLoader(klass
+									.getClassLoader()))
+								continue;
+
+							String klassName = klass.getName().getClassName()
+									.toString();
+							for (Map.Entry<String, String> site : sites
+									.entrySet()) {
+								if (klassName.contentEquals(site.getKey())) {
+									for (IMethod m : klass.getDeclaredMethods()) {
+										if (this.getStandartMethodSignature(m)
+												.contains(site.getValue())) {
+											entrypoints2
+													.add(new DefaultEntrypoint(
+															m, classHierarchy));
+											sites.remove(site.getKey());
+											break;
+										}
+									}
+								}
+							}
+						} else {
+							break;
+						}
+
+					}
+				} else {
 					entrypoints = new AllApplicationEntrypoints(analysisScope,
 							classHierarchy);
 				}
 
-				AnalysisOptions options = new AnalysisOptions(
-						this.analysisScope, entrypoints);
+				// entrypoints = Util.makeMainEntrypoints(this.analysisScope,
+				// this.classHierarchy);
+				// if (!entrypoints.iterator().hasNext()) {
+				// Demostenes Metodo
+				// entrypoints =
+				// makeLibraryEntrypoints(analysisScope,classHierarchy);
+				// Metodo WAlA para gerar entrypoints da aplicação
+				// entrypoints = new
+				// AllApplicationEntrypoints(analysisScope,classHierarchy);
+				// }
 
-				// options.setReflectionOptions(AnalysisOptions.ReflectionOptions.FULL);
-				options.setReflectionOptions(AnalysisOptions.ReflectionOptions.NONE);
+				AnalysisOptions options;
+				if (entrypoints != null) {
+					options = new AnalysisOptions(this.analysisScope,
+							entrypoints);
+				} else if (entrypoints2 != null) {
+					options = new AnalysisOptions(this.analysisScope,
+							entrypoints2);
+				} else {
+					System.out
+							.println("  -|Nao foi possivel gerar um entrypoint para o sistema");
+					return;
+				}
 
-//				 SSAPropagationCallGraphBuilder builder = null;
-//				PropagationCallGraphBuilder builder = null;
+				 options.setReflectionOptions(AnalysisOptions.ReflectionOptions.FULL);
+//				options.setReflectionOptions(AnalysisOptions.ReflectionOptions.NONE);
+
+				// SSAPropagationCallGraphBuilder builder = null;
+				// PropagationCallGraphBuilder builder = null;
 				CallGraphBuilder builder = null;
 
-				IClassHierarchy cha = this.classHierarchy;
-				AnalysisScope scope = this.analysisScope;
+				// IClassHierarchy cha = this.classHierarchy;
+				// AnalysisScope scope = this.analysisScope;
 
 				/*
 				 * opcoes: makeRTABuilder = Rapid Type Analysis
 				 * makeZeroCFABuilder = context-insensitive, class-based heap
-				 * makeZeroOneCFABuilder = context-insensitive, allocation-site-based heap 
-				 * makeZeroOneContainerCFABuilder = 0-1-CFA with object-sensitive containers
+				 * makeZeroOneCFABuilder = context-insensitive,
+				 * allocation-site-based heap makeZeroOneContainerCFABuilder =
+				 * 0-1-CFA with object-sensitive containers
 				 * 
-				 * makeZeroContainerCFABuilder = 0-CFA Call Graph Builder augmented with extra logic for containers 
-				 * makeNCFABuilder =uses call-string context sensitivity, with call-string length limited to n, and a context-sensitive allocation-site-based
-				 * heap abstraction.
+				 * makeZeroContainerCFABuilder = 0-CFA Call Graph Builder
+				 * augmented with extra logic for containers makeNCFABuilder
+				 * =uses call-string context sensitivity, with call-string
+				 * length limited to n, and a context-sensitive
+				 * allocation-site-based heap abstraction.
 				 * 
 				 * makeVanillaZeroOneCFABuilder
-				 * makeVanillaZeroOneContainerCFABuilder 
-				 * makeVanillaNCFABuilder
+				 * makeVanillaZeroOneContainerCFABuilder makeVanillaNCFABuilder
 				 */
-				builder = Util.makeRTABuilder(options,
-						new AnalysisCache(), cha, scope);
+				builder = Util.makeRTABuilder(options, new AnalysisCache(),
+						classHierarchy, analysisScope);
+
+				// builder.setContextSelector(new
+				// MethodHandles.ContextSelectorImpl(builder.getContextSelector()));
+				// builder.setContextInterpreter(new
+				// DelegatingSSAContextInterpreter(new
+				// MethodHandles.ContextInterpreterImpl(),
+				// builder.getCFAContextInterpreter()));
 
 				// Adicionei para tentar resolver a recursao
 				// System.out.println("Context Selector: " +
@@ -126,12 +188,6 @@ public class CallGraphWALA {
 				// DefaultContextSelector contextSelector = new
 				// DefaultContextSelector(options, cha);
 				// builder.setContextSelector(contextSelector);
-
-				if (!entrypoints.iterator().hasNext()) {
-					System.out
-							.println("  -|Nao foi possivel gerar um entrypoint para o sistema");
-					return;
-				}
 
 				System.out.println("  -|CallGraph is being created.");
 				this.cg = builder.makeCallGraph(options, null);
@@ -153,11 +209,10 @@ public class CallGraphWALA {
 				// "A", "L");
 				//
 				printNodes(cg);
-//				out.write("=========================================" + "\n");
-				
-//				printCallGraph(cg,cg.getFakeRootNode(),0);
-				
+				// out.write("=========================================" +
+				// "\n");
 
+				// printCallGraph(cg,cg.getFakeRootNode(),0);
 
 				System.out
 						.println("    -|Application entries saved to file: callEntries.txt");
@@ -169,7 +224,40 @@ public class CallGraphWALA {
 		}
 	}
 
-	private void printCallGraph(CallGraph cg, CGNode currentNode, int level) throws IOException {
+	private Iterable<Entrypoint> makeLibraryEntrypoints(AnalysisScope scope,
+			IClassHierarchy cha) {
+		if (cha == null) {
+			throw new IllegalArgumentException("cha is null");
+		}
+		final HashSet<Entrypoint> entryPoints = HashSetFactory.make();
+		int classCount = 0;
+		for (IClass klass : cha) {
+			if (!scope.isApplicationLoader(klass.getClassLoader()))
+				continue;
+			for (IMethod m : klass.getDeclaredMethods()) {
+				if (m.isPublic() || m.isProtected()) {
+					entryPoints.add(new DefaultEntrypoint(m, cha));
+				}
+			}
+			classCount++;
+			System.out.println(classCount + ": " + klass + " | "
+					+ klass.getDeclaredMethods().size());
+			if (scope.isApplicationLoader(klass.getClassLoader())) {
+				for (IMethod m1 : klass.getDeclaredMethods()) {
+					// System.out.println("\t"+m);
+					if (m1.isPublic() || m1.isProtected()) {
+						entryPoints.add(new DefaultEntrypoint(m1, cha));
+					}
+				}
+			} else {
+				continue;
+			}
+		}
+		return entryPoints;
+	}
+
+	private void printCallGraph(CallGraph cg, CGNode currentNode, int level)
+			throws IOException {
 		String indent = "";
 		for (int i = 0; i < level; i++) {
 			indent += ">";
@@ -178,8 +266,8 @@ public class CallGraphWALA {
 			this.cgset = new HashSet<String>();
 
 		String methodSig = getStandartMethodSignature(currentNode.getMethod());
-		out.write(indent + methodSig+"\n");
-//		System.out.println(indent + methodSig);
+		out.write(indent + methodSig + "\n");
+		// System.out.println(indent + methodSig);
 
 		this.cgset.add(methodSig);
 
@@ -194,19 +282,21 @@ public class CallGraphWALA {
 
 			if (cg.getPossibleTargets(currentNode, callsite).isEmpty()) {
 				methodSig = callsite.getDeclaredTarget().getSignature();
-				out.write(indent + ">" + methodSig+"\n");
-//				System.out.println(indent + ">" + methodSig);
+				out.write(indent + ">" + methodSig + "\n");
+				// System.out.println(indent + ">" + methodSig);
 			} else {
-				for (CGNode targetNode : cg.getPossibleTargets(currentNode,callsite)) {
-					methodSig = getStandartMethodSignature(targetNode.getMethod());
+				for (CGNode targetNode : cg.getPossibleTargets(currentNode,
+						callsite)) {
+					methodSig = getStandartMethodSignature(targetNode
+							.getMethod());
 					if (targetNode.getMethod().getDeclaringClass()
 							.getClassLoader().getReference()
 							.equals(ClassLoaderReference.Application)
 							&& !this.cgset.contains(methodSig)) {
 						printCallGraph(cg, targetNode, level + 1);
 					} else {
-						out.write(indent + ">" + methodSig+"\n");
-//						System.out.println(indent + ">" + methodSig);
+						out.write(indent + ">" + methodSig + "\n");
+						// System.out.println(indent + ">" + methodSig);
 					}
 				}
 			}
@@ -329,19 +419,25 @@ public class CallGraphWALA {
 		this.analysisScope = AnalysisScopeReader.makeJavaBinaryAnalysisScope(
 				application_path, new File(
 						CallGraphTestUtil.REGRESSION_EXCLUSIONS));
+
+		// this.analysisScope =
+		// CallGraphTestUtil.makeJ2SEAnalysisScope(application_path,
+		// CallGraphTestUtil.REGRESSION_EXCLUSIONS);
+
 		// analysisScope.addToScope(ClassLoaderReference.Primordial,new
 		// JarFile(PropertiesUtil.getPropertieValueOf("config",
 		// "PRIMORDIAL_LIB")));
-		
-		analysisScope.addToScope(CallGraphTestUtil
-						.makeJ2SEAnalysisScope(
-								"/Users/fladson/git/PathCoverage/src/properties/primordial.txt","/Users/fladson/git/PathCoverage/src/properties/applicationExclusions.txt"));
 
-		ClassLoaderReference loader = analysisScope
-				.getLoader(AnalysisScope.APPLICATION);
-		addClassPathToScope(application_path, analysisScope, loader);
+		// analysisScope.addToScope (
+		// CallGraphTestUtil.makeJ2SEAnalysisScope("/Users/fladson/git/PathCoverage/src/properties/primordial.txt",
+		// (System.getProperty("os.name").equals("Mac OS X"))?
+		// "/Users/fladson/git/PathCoverage/src/properties/Java60RegressionExclusions.txt":
+		// "/Users/fladson/git/PathCoverage/src/properties/GUIExclusions.txt"));
+
+		// ClassLoaderReference loader =
+		// analysisScope.getLoader(AnalysisScope.APPLICATION);
+		// addClassPathToScope(application_path, analysisScope, loader);
 	}
-	
 
 	private void loadClassHierarchy() throws ClassHierarchyException {
 		System.out.println("  -|Loading class hierarchy...");
@@ -359,7 +455,7 @@ public class CallGraphWALA {
 		if (root.getMethod().getDeclaringClass().getClassLoader().toString()
 				.equals("Primordial"))
 			return;
-
+		// System.out.println(getStandartMethodSignature(root.getMethod()));
 		if (visited.contains(root)) {
 			printLevelTabs(level);
 			out.write("[*]" + getStandartMethodSignature(root.getMethod())
