@@ -5,8 +5,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
-import org.apache.commons.lang3.StringUtils;
-
 public abstract class ChangedMethodUtil {
 
 	public static void formatChangedMehodsFromFile(boolean format) {

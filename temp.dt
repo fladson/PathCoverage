@@ -1,51 +1,39 @@
 digraph "DirectedGraph" {
 graph [concentrate = true];center=true;fontsize=6;node [ color=blue,shape="box"fontsize=6,fontcolor=black,fontname=Arial];edge [ color=black,fontsize=6,fontcolor=black,fontname=Arial]; 
    "Node: synthetic < Primordial, Lcom/ibm/wala/FakeRootClass, fakeRootMethod()V > Context: Everywhere" [ ]
-   "Node: < Application, Lbr/ufrn/ase/Classe2, <init>()V > Context: Everywhere" [ ]
-   "Node: < Application, Lbr/ufrn/ase/Classe2, metodoQualquer(I)V > Context: Everywhere" [ ]
-   "Node: < Application, Lbr/ufrn/ase/Classe2, outro(I)I > Context: Everywhere" [ ]
-   "Node: < Application, Lbr/ufrn/ase/test/TestClasse1, <init>()V > Context: Everywhere" [ ]
-   "Node: < Application, Lbr/ufrn/ase/test/TestClasse1, Test()V > Context: Everywhere" [ ]
-   "Node: < Application, Lbr/ufrn/ase/test/TestClasse2, <init>()V > Context: Everywhere" [ ]
-   "Node: < Application, Lbr/ufrn/ase/test/TestClasse2, Test()V > Context: Everywhere" [ ]
-   "Node: < Application, Lbr/ufrn/ase/Classe1, <init>()V > Context: Everywhere" [ ]
-   "Node: < Application, Lbr/ufrn/ase/Classe1, adicao(II)I > Context: Everywhere" [ ]
-   "Node: < Application, Lbr/ufrn/ase/Classe1, subtracao(II)I > Context: Everywhere" [ ]
-   "Node: < Application, Lbr/ufrn/ase/Classe1, divisao(II)I > Context: Everywhere" [ ]
-   "Node: < Application, Lbr/ufrn/ase/Classe1, multiplicacao(II)I > Context: Everywhere" [ ]
-   "Node: < Application, Lbr/ufrn/ase/Classe1, metodoA(I)V > Context: Everywhere" [ ]
-   "Node: < Application, Lbr/ufrn/ase/Classe1, metodoB(I)I > Context: Everywhere" [ ]
-   "Node: < Application, Lbr/ufrn/ase/Classe1, setV(I)V > Context: Everywhere" [ ]
-   "Node: < Application, Lbr/ufrn/ase/Classe1, getV()I > Context: Everywhere" [ ]
-   "Node: < Application, Lbr/ufrn/ase/Classe1, metodoadicionado()V > Context: Everywhere" [ ]
- "Node: synthetic < Primordial, Lcom/ibm/wala/FakeRootClass, fakeRootMethod()V > Context: Everywhere" -> "Node: < Application, Lbr/ufrn/ase/Classe2, <init>()V > Context: Everywhere" 
- "Node: synthetic < Primordial, Lcom/ibm/wala/FakeRootClass, fakeRootMethod()V > Context: Everywhere" -> "Node: < Application, Lbr/ufrn/ase/Classe2, metodoQualquer(I)V > Context: Everywhere" 
- "Node: synthetic < Primordial, Lcom/ibm/wala/FakeRootClass, fakeRootMethod()V > Context: Everywhere" -> "Node: < Application, Lbr/ufrn/ase/Classe2, outro(I)I > Context: Everywhere" 
- "Node: synthetic < Primordial, Lcom/ibm/wala/FakeRootClass, fakeRootMethod()V > Context: Everywhere" -> "Node: < Application, Lbr/ufrn/ase/test/TestClasse1, <init>()V > Context: Everywhere" 
- "Node: synthetic < Primordial, Lcom/ibm/wala/FakeRootClass, fakeRootMethod()V > Context: Everywhere" -> "Node: < Application, Lbr/ufrn/ase/test/TestClasse1, Test()V > Context: Everywhere" 
- "Node: synthetic < Primordial, Lcom/ibm/wala/FakeRootClass, fakeRootMethod()V > Context: Everywhere" -> "Node: < Application, Lbr/ufrn/ase/test/TestClasse2, <init>()V > Context: Everywhere" 
- "Node: synthetic < Primordial, Lcom/ibm/wala/FakeRootClass, fakeRootMethod()V > Context: Everywhere" -> "Node: < Application, Lbr/ufrn/ase/test/TestClasse2, Test()V > Context: Everywhere" 
- "Node: synthetic < Primordial, Lcom/ibm/wala/FakeRootClass, fakeRootMethod()V > Context: Everywhere" -> "Node: < Application, Lbr/ufrn/ase/Classe1, <init>()V > Context: Everywhere" 
- "Node: synthetic < Primordial, Lcom/ibm/wala/FakeRootClass, fakeRootMethod()V > Context: Everywhere" -> "Node: < Application, Lbr/ufrn/ase/Classe1, adicao(II)I > Context: Everywhere" 
- "Node: synthetic < Primordial, Lcom/ibm/wala/FakeRootClass, fakeRootMethod()V > Context: Everywhere" -> "Node: < Application, Lbr/ufrn/ase/Classe1, subtracao(II)I > Context: Everywhere" 
- "Node: synthetic < Primordial, Lcom/ibm/wala/FakeRootClass, fakeRootMethod()V > Context: Everywhere" -> "Node: < Application, Lbr/ufrn/ase/Classe1, divisao(II)I > Context: Everywhere" 
- "Node: synthetic < Primordial, Lcom/ibm/wala/FakeRootClass, fakeRootMethod()V > Context: Everywhere" -> "Node: < Application, Lbr/ufrn/ase/Classe1, multiplicacao(II)I > Context: Everywhere" 
- "Node: synthetic < Primordial, Lcom/ibm/wala/FakeRootClass, fakeRootMethod()V > Context: Everywhere" -> "Node: < Application, Lbr/ufrn/ase/Classe1, metodoA(I)V > Context: Everywhere" 
- "Node: synthetic < Primordial, Lcom/ibm/wala/FakeRootClass, fakeRootMethod()V > Context: Everywhere" -> "Node: < Application, Lbr/ufrn/ase/Classe1, metodoB(I)I > Context: Everywhere" 
- "Node: synthetic < Primordial, Lcom/ibm/wala/FakeRootClass, fakeRootMethod()V > Context: Everywhere" -> "Node: < Application, Lbr/ufrn/ase/Classe1, setV(I)V > Context: Everywhere" 
- "Node: synthetic < Primordial, Lcom/ibm/wala/FakeRootClass, fakeRootMethod()V > Context: Everywhere" -> "Node: < Application, Lbr/ufrn/ase/Classe1, getV()I > Context: Everywhere" 
- "Node: synthetic < Primordial, Lcom/ibm/wala/FakeRootClass, fakeRootMethod()V > Context: Everywhere" -> "Node: < Application, Lbr/ufrn/ase/Classe1, metodoadicionado()V > Context: Everywhere" 
- "Node: < Application, Lbr/ufrn/ase/Classe2, metodoQualquer(I)V > Context: Everywhere" -> "Node: < Application, Lbr/ufrn/ase/Classe2, outro(I)I > Context: Everywhere" 
- "Node: < Application, Lbr/ufrn/ase/test/TestClasse1, Test()V > Context: Everywhere" -> "Node: < Application, Lbr/ufrn/ase/Classe1, <init>()V > Context: Everywhere" 
- "Node: < Application, Lbr/ufrn/ase/test/TestClasse1, Test()V > Context: Everywhere" -> "Node: < Application, Lbr/ufrn/ase/Classe1, adicao(II)I > Context: Everywhere" 
- "Node: < Application, Lbr/ufrn/ase/test/TestClasse1, Test()V > Context: Everywhere" -> "Node: < Application, Lbr/ufrn/ase/Classe1, subtracao(II)I > Context: Everywhere" 
- "Node: < Application, Lbr/ufrn/ase/test/TestClasse1, Test()V > Context: Everywhere" -> "Node: < Application, Lbr/ufrn/ase/Classe1, divisao(II)I > Context: Everywhere" 
- "Node: < Application, Lbr/ufrn/ase/test/TestClasse1, Test()V > Context: Everywhere" -> "Node: < Application, Lbr/ufrn/ase/Classe1, multiplicacao(II)I > Context: Everywhere" 
- "Node: < Application, Lbr/ufrn/ase/test/TestClasse1, Test()V > Context: Everywhere" -> "Node: < Application, Lbr/ufrn/ase/Classe1, setV(I)V > Context: Everywhere" 
- "Node: < Application, Lbr/ufrn/ase/test/TestClasse1, Test()V > Context: Everywhere" -> "Node: < Application, Lbr/ufrn/ase/Classe1, getV()I > Context: Everywhere" 
- "Node: < Application, Lbr/ufrn/ase/test/TestClasse2, Test()V > Context: Everywhere" -> "Node: < Application, Lbr/ufrn/ase/Classe2, <init>()V > Context: Everywhere" 
- "Node: < Application, Lbr/ufrn/ase/test/TestClasse2, Test()V > Context: Everywhere" -> "Node: < Application, Lbr/ufrn/ase/Classe2, outro(I)I > Context: Everywhere" 
- "Node: < Application, Lbr/ufrn/ase/Classe1, multiplicacao(II)I > Context: Everywhere" -> "Node: < Application, Lbr/ufrn/ase/Classe1, setV(I)V > Context: Everywhere" 
- "Node: < Application, Lbr/ufrn/ase/Classe1, metodoA(I)V > Context: Everywhere" -> "Node: < Application, Lbr/ufrn/ase/Classe1, metodoB(I)I > Context: Everywhere" 
+   "Node: < Application, Lbr/ufrn/ppgsc/A, <init>()V > Context: Everywhere" [ ]
+   "Node: < Application, Lbr/ufrn/ppgsc/A, soma(II)I > Context: Everywhere" [ ]
+   "Node: < Application, Lbr/ufrn/ppgsc/B, <init>()V > Context: Everywhere" [ ]
+   "Node: < Application, Lbr/ufrn/ppgsc/B, subtracao(II)I > Context: Everywhere" [ ]
+   "Node: < Application, Lbr/ufrn/ppgsc/C, <init>()V > Context: Everywhere" [ ]
+   "Node: < Application, Lbr/ufrn/ppgsc/A, parse(Ljava/lang/String;)Ljava/lang/String; > Context: Everywhere" [ ]
+   "Node: < Application, Lbr/ufrn/ppgsc/C, mutiplicacao(II)I > Context: Everywhere" [ ]
+   "Node: < Application, Lbr/ufrn/ppgsc/A, addName(Ljava/lang/String;)Ljava/lang/String; > Context: Everywhere" [ ]
+   "Node: < Application, Lbr/ufrn/ppgsc/D, <init>()V > Context: Everywhere" [ ]
+   "Node: < Application, Lbr/ufrn/ppgsc/D, multD(II)I > Context: Everywhere" [ ]
+   "Node: < Application, Lbr/ufrn/ppgsc/B, transform(Ljava/lang/String;)Ljava/lang/String; > Context: Everywhere" [ ]
+   "Node: < Application, Lbr/ufrn/ppgsc/C, combine(Ljava/lang/String;)Ljava/lang/String; > Context: Everywhere" [ ]
+ "Node: synthetic < Primordial, Lcom/ibm/wala/FakeRootClass, fakeRootMethod()V > Context: Everywhere" -> "Node: < Application, Lbr/ufrn/ppgsc/A, <init>()V > Context: Everywhere" 
+ "Node: synthetic < Primordial, Lcom/ibm/wala/FakeRootClass, fakeRootMethod()V > Context: Everywhere" -> "Node: < Application, Lbr/ufrn/ppgsc/A, soma(II)I > Context: Everywhere" 
+ "Node: synthetic < Primordial, Lcom/ibm/wala/FakeRootClass, fakeRootMethod()V > Context: Everywhere" -> "Node: < Application, Lbr/ufrn/ppgsc/B, <init>()V > Context: Everywhere" 
+ "Node: synthetic < Primordial, Lcom/ibm/wala/FakeRootClass, fakeRootMethod()V > Context: Everywhere" -> "Node: < Application, Lbr/ufrn/ppgsc/B, subtracao(II)I > Context: Everywhere" 
+ "Node: synthetic < Primordial, Lcom/ibm/wala/FakeRootClass, fakeRootMethod()V > Context: Everywhere" -> "Node: < Application, Lbr/ufrn/ppgsc/C, <init>()V > Context: Everywhere" 
+ "Node: synthetic < Primordial, Lcom/ibm/wala/FakeRootClass, fakeRootMethod()V > Context: Everywhere" -> "Node: < Application, Lbr/ufrn/ppgsc/A, parse(Ljava/lang/String;)Ljava/lang/String; > Context: Everywhere" 
+ "Node: synthetic < Primordial, Lcom/ibm/wala/FakeRootClass, fakeRootMethod()V > Context: Everywhere" -> "Node: < Application, Lbr/ufrn/ppgsc/C, mutiplicacao(II)I > Context: Everywhere" 
+ "Node: synthetic < Primordial, Lcom/ibm/wala/FakeRootClass, fakeRootMethod()V > Context: Everywhere" -> "Node: < Application, Lbr/ufrn/ppgsc/A, addName(Ljava/lang/String;)Ljava/lang/String; > Context: Everywhere" 
+ "Node: synthetic < Primordial, Lcom/ibm/wala/FakeRootClass, fakeRootMethod()V > Context: Everywhere" -> "Node: < Application, Lbr/ufrn/ppgsc/D, <init>()V > Context: Everywhere" 
+ "Node: synthetic < Primordial, Lcom/ibm/wala/FakeRootClass, fakeRootMethod()V > Context: Everywhere" -> "Node: < Application, Lbr/ufrn/ppgsc/D, multD(II)I > Context: Everywhere" 
+ "Node: synthetic < Primordial, Lcom/ibm/wala/FakeRootClass, fakeRootMethod()V > Context: Everywhere" -> "Node: < Application, Lbr/ufrn/ppgsc/B, transform(Ljava/lang/String;)Ljava/lang/String; > Context: Everywhere" 
+ "Node: synthetic < Primordial, Lcom/ibm/wala/FakeRootClass, fakeRootMethod()V > Context: Everywhere" -> "Node: < Application, Lbr/ufrn/ppgsc/C, combine(Ljava/lang/String;)Ljava/lang/String; > Context: Everywhere" 
+ "Node: < Application, Lbr/ufrn/ppgsc/B, <init>()V > Context: Everywhere" -> "Node: < Application, Lbr/ufrn/ppgsc/A, <init>()V > Context: Everywhere" 
+ "Node: < Application, Lbr/ufrn/ppgsc/C, <init>()V > Context: Everywhere" -> "Node: < Application, Lbr/ufrn/ppgsc/A, <init>()V > Context: Everywhere" 
+ "Node: < Application, Lbr/ufrn/ppgsc/C, <init>()V > Context: Everywhere" -> "Node: < Application, Lbr/ufrn/ppgsc/B, <init>()V > Context: Everywhere" 
+ "Node: < Application, Lbr/ufrn/ppgsc/A, parse(Ljava/lang/String;)Ljava/lang/String; > Context: Everywhere" -> "Node: < Application, Lbr/ufrn/ppgsc/A, addName(Ljava/lang/String;)Ljava/lang/String; > Context: Everywhere" 
+ "Node: < Application, Lbr/ufrn/ppgsc/C, mutiplicacao(II)I > Context: Everywhere" -> "Node: < Application, Lbr/ufrn/ppgsc/A, soma(II)I > Context: Everywhere" 
+ "Node: < Application, Lbr/ufrn/ppgsc/D, <init>()V > Context: Everywhere" -> "Node: < Application, Lbr/ufrn/ppgsc/C, <init>()V > Context: Everywhere" 
+ "Node: < Application, Lbr/ufrn/ppgsc/D, multD(II)I > Context: Everywhere" -> "Node: < Application, Lbr/ufrn/ppgsc/C, mutiplicacao(II)I > Context: Everywhere" 
+ "Node: < Application, Lbr/ufrn/ppgsc/B, transform(Ljava/lang/String;)Ljava/lang/String; > Context: Everywhere" -> "Node: < Application, Lbr/ufrn/ppgsc/A, addName(Ljava/lang/String;)Ljava/lang/String; > Context: Everywhere" 
+ "Node: < Application, Lbr/ufrn/ppgsc/C, combine(Ljava/lang/String;)Ljava/lang/String; > Context: Everywhere" -> "Node: < Application, Lbr/ufrn/ppgsc/A, addName(Ljava/lang/String;)Ljava/lang/String; > Context: Everywhere" 
+ "Node: < Application, Lbr/ufrn/ppgsc/C, combine(Ljava/lang/String;)Ljava/lang/String; > Context: Everywhere" -> "Node: < Application, Lbr/ufrn/ppgsc/B, transform(Ljava/lang/String;)Ljava/lang/String; > Context: Everywhere" 
 
 }

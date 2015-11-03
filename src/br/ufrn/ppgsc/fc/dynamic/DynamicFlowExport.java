@@ -2,9 +2,7 @@ package br.ufrn.ppgsc.fc.dynamic;
 
 import java.io.IOException;
 import java.util.Iterator;
-import java.util.Set;
 
-import br.ufrn.ppgsc.fc.model.Node;
 import br.ufrn.ppgsc.fc.model.RuntimeNode;
 import br.ufrn.ppgsc.fc.model.RuntimeScenario;
 

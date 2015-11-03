@@ -1,6 +1,5 @@
 package br.ufrn.ppgsc.fc.connectors;
 
-import java.util.List;
 
 public abstract class SCMConnector {
 	

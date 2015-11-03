@@ -33,9 +33,6 @@ import org.eclipse.egit.github.core.client.GitHubClient;
 import org.eclipse.egit.github.core.service.CommitService;
 import org.eclipse.egit.github.core.service.PullRequestService;
 import org.eclipse.egit.github.core.service.RepositoryService;
-import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.api.errors.GitAPIException;
-
 import br.ufrn.ppgsc.fc.connectors.EvolutionConnector;
 import br.ufrn.ppgsc.fc.jdt.MethodLimitBuilder;
 import br.ufrn.ppgsc.fc.jdt.UpdatedLine;

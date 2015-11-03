@@ -1,6 +1,5 @@
 package br.ufrn.ppgsc.fc.connectors;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Properties;
 

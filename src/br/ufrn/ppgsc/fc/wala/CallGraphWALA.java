@@ -14,14 +14,12 @@ import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.jar.JarFile;
 
-import com.ibm.wala.analysis.reflection.java7.MethodHandles;
-import com.ibm.wala.analysis.typeInference.TypeInference;
 import com.ibm.wala.classLoader.BinaryDirectoryTreeModule;
 import com.ibm.wala.classLoader.CallSiteReference;
 import com.ibm.wala.classLoader.IClass;
+import com.ibm.wala.classLoader.IClassLoader;
 import com.ibm.wala.classLoader.IMethod;
 import com.ibm.wala.core.tests.callGraph.CallGraphTestUtil;
-import com.ibm.wala.examples.drivers.PDFTypeHierarchy;
 import com.ibm.wala.ipa.callgraph.AnalysisCache;
 import com.ibm.wala.ipa.callgraph.AnalysisOptions;
 import com.ibm.wala.ipa.callgraph.AnalysisScope;
@@ -32,38 +30,32 @@ import com.ibm.wala.ipa.callgraph.CallGraphBuilderCancelException;
 import com.ibm.wala.ipa.callgraph.Context;
 import com.ibm.wala.ipa.callgraph.Entrypoint;
 import com.ibm.wala.ipa.callgraph.impl.AllApplicationEntrypoints;
-import com.ibm.wala.ipa.callgraph.impl.DefaultContextSelector;
 import com.ibm.wala.ipa.callgraph.impl.DefaultEntrypoint;
 import com.ibm.wala.ipa.callgraph.impl.Util;
-import com.ibm.wala.ipa.callgraph.propagation.LocalPointerKey;
-import com.ibm.wala.ipa.callgraph.propagation.PropagationCallGraphBuilder;
-import com.ibm.wala.ipa.callgraph.propagation.SSAPropagationCallGraphBuilder;
-import com.ibm.wala.ipa.callgraph.propagation.cfa.DelegatingSSAContextInterpreter;
+import com.ibm.wala.ipa.callgraph.propagation.InstanceKey;
+import com.ibm.wala.ipa.callgraph.propagation.PointerAnalysis;
 import com.ibm.wala.ipa.cha.ClassHierarchy;
 import com.ibm.wala.ipa.cha.ClassHierarchyException;
 import com.ibm.wala.ipa.cha.IClassHierarchy;
 import com.ibm.wala.shrikeCT.InvalidClassFileException;
 import com.ibm.wala.types.ClassLoaderReference;
 import com.ibm.wala.types.TypeName;
-import com.ibm.wala.util.Predicate;
 import com.ibm.wala.util.WalaException;
 import com.ibm.wala.util.collections.HashSetFactory;
-import com.ibm.wala.util.collections.NonNullSingletonIterator;
 import com.ibm.wala.util.config.AnalysisScopeReader;
 import com.ibm.wala.util.debug.Assertions;
 import com.ibm.wala.util.graph.Graph;
 import com.ibm.wala.util.graph.GraphIntegrity;
 import com.ibm.wala.util.graph.GraphIntegrity.UnsoundGraphException;
-import com.ibm.wala.util.graph.GraphPrint;
-import com.ibm.wala.util.graph.traverse.DFS;
-import com.ibm.wala.util.graph.traverse.DFSAllPathsFinder;
 import com.ibm.wala.util.strings.Atom;
+import com.ibm.wala.viz.viewer.WalaViewer;
 
 public class CallGraphWALA {
 
 	private CallGraph cg = null;
 	private AnalysisScope analysisScope = null;
 	private ClassHierarchy classHierarchy = null;
+	IClassLoader loaderAppClass = null;
 	protected Graph<CGNode> graph_pruned = null;
 	FileWriter out = null;
 	protected String node_string = "node";
@@ -82,57 +74,39 @@ public class CallGraphWALA {
 				loadAnalysisScope(application);
 				loadClassHierarchy();
 				System.out.println("  -|Getting EntryPoints...");
+				// Application all entry points
 				Iterable<Entrypoint> entrypoints = null;
-
+				// Selected entry points
 				HashSet<Entrypoint> entrypoints2 = null;
 				Map<String, String> sites = new HashMap<String, String>();
-				sites.put("GoogleCredentials", "getApplicationDefault");
-				if (sites.size() != 0) {
+//				sites.put("UsuarioMBean", "logar");
+				sites.put("Lsrc/C", "met_C2");
+				sites.put("Lsrc/B", "met_B1");
+
+				// Restringindo o escopo para as classes da aplicação.		
+				loaderAppClass = classHierarchy.getFactory().getLoader(ClassLoaderReference.Application, classHierarchy, analysisScope);						
+				
+				if(sites.size() >= 1){
 					entrypoints2 = HashSetFactory.make();
-					for (IClass klass : this.classHierarchy) {
-						if (sites.size() != 0) {
-							if (!this.analysisScope.isApplicationLoader(klass
-									.getClassLoader()))
-								continue;
-
-							String klassName = klass.getName().getClassName()
-									.toString();
-							for (Map.Entry<String, String> site : sites
-									.entrySet()) {
-								if (klassName.contentEquals(site.getKey())) {
-									for (IMethod m : klass.getDeclaredMethods()) {
-										if (this.getStandartMethodSignature(m)
-												.contains(site.getValue())) {
-											entrypoints2
-													.add(new DefaultEntrypoint(
-															m, classHierarchy));
-											sites.remove(site.getKey());
-											break;
-										}
-									}
-								}
+					for (Map.Entry<String, String> site : sites.entrySet()) {
+						IClass clazz = loaderAppClass.lookupClass(TypeName.findOrCreate(site.getKey()));
+						for (IMethod m : clazz.getDeclaredMethods()) {
+							if (this.getStandartMethodSignature(m).contains(site.getValue())) {
+								System.out.println("\t-|Adding entrypoint: " + this.getStandartMethodSignature(m));
+								entrypoints2
+										.add(new DefaultEntrypoint(
+												m, classHierarchy));
+//								sites.remove(site.getKey());
+								break;
 							}
-						} else {
-							break;
 						}
-
 					}
-				} else {
+					
+				}else{
 					entrypoints = new AllApplicationEntrypoints(analysisScope,
 							classHierarchy);
 				}
-
-				// entrypoints = Util.makeMainEntrypoints(this.analysisScope,
-				// this.classHierarchy);
-				// if (!entrypoints.iterator().hasNext()) {
-				// Demostenes Metodo
-				// entrypoints =
-				// makeLibraryEntrypoints(analysisScope,classHierarchy);
-				// Metodo WAlA para gerar entrypoints da aplicação
-				// entrypoints = new
-				// AllApplicationEntrypoints(analysisScope,classHierarchy);
-				// }
-
+				
 				AnalysisOptions options;
 				if (entrypoints != null) {
 					options = new AnalysisOptions(this.analysisScope,
@@ -199,21 +173,16 @@ public class CallGraphWALA {
 				Collection<CGNode> entries = cg.getEntrypointNodes();
 
 				System.out.println("\tENTRY POINTS: " + entries.size());
+				
+				PointerAnalysis<InstanceKey> pa = builder.getPointerAnalysis();
+//			    new WalaViewer(cg, pa);
 
 				try {
 					GraphIntegrity.check(cg);
 				} catch (UnsoundGraphException e) {
 					e.printStackTrace();
 				}
-				// DFSAllPathsFinder<String> paths = makeFinder((CallGraph)cg,
-				// "A", "L");
-				//
 				printNodes(cg);
-				// out.write("=========================================" +
-				// "\n");
-
-				// printCallGraph(cg,cg.getFakeRootNode(),0);
-
 				System.out
 						.println("    -|Application entries saved to file: callEntries.txt");
 				out.close();
@@ -434,9 +403,9 @@ public class CallGraphWALA {
 		// "/Users/fladson/git/PathCoverage/src/properties/Java60RegressionExclusions.txt":
 		// "/Users/fladson/git/PathCoverage/src/properties/GUIExclusions.txt"));
 
-		// ClassLoaderReference loader =
-		// analysisScope.getLoader(AnalysisScope.APPLICATION);
-		// addClassPathToScope(application_path, analysisScope, loader);
+//		 ClassLoaderReference loader =
+//		 analysisScope.getLoader(AnalysisScope.APPLICATION);
+//		 addClassPathToScope(application_path, analysisScope, loader);
 	}
 
 	private void loadClassHierarchy() throws ClassHierarchyException {

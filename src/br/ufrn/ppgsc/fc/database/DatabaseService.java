@@ -1,10 +1,6 @@
 package br.ufrn.ppgsc.fc.database;
 
 import java.io.Serializable;
-import java.util.Iterator;
-//
-//import br.ufrn.ppgsc.scenario.analyzer.cdynamic.model.RuntimeScenario;
-//import br.ufrn.ppgsc.scenario.analyzer.cdynamic.model.SystemExecution;
 
 public class DatabaseService<T extends Serializable> {
 
