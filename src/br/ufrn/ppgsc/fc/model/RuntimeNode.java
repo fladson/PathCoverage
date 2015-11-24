@@ -36,17 +36,17 @@ public class RuntimeNode implements Serializable {
 	@Column(name = "member", columnDefinition = "text")
 	private String memberSignature;
 
-	@Column(name = "exception", columnDefinition = "text")
-	private String exceptionMessage;
-
-	@Column(name = "time")
-	private long executionTime;
+//	@Column(name = "exception", columnDefinition = "text")
+//	private String exceptionMessage;
+//
+//	@Column(name = "time")
+//	private long executionTime;
 	
-	@Column(name = "real_time")
-	private long realExecutionTime;
-
-	@Column(name = "constructor")
-	private boolean isConstructor;
+//	@Column(name = "real_time")
+//	private long realExecutionTime;
+//
+//	@Column(name = "constructor")
+//	private boolean isConstructor;
 //
 //	@ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 //	@JoinTable(name = "node_annotation",
@@ -79,7 +79,7 @@ public class RuntimeNode implements Serializable {
 		scenarios = new ArrayList<RuntimeScenario>();
 		memberSignature = MemberUtil.getStandartMethodSignature(member);
 //		annotations = RuntimeCallGraph.getInstance().parseMemberAnnotations(member);
-		isConstructor = member instanceof Constructor;
+//		isConstructor = member instanceof Constructor;
 	}
 
 	public long getId() {
@@ -98,37 +98,37 @@ public class RuntimeNode implements Serializable {
 		this.memberSignature = memberSignature;
 	}
 
-	public String getExceptionMessage() {
-		return exceptionMessage;
-	}
-
-	public void setExceptionMessage(String exceptionMessage) {
-		this.exceptionMessage = exceptionMessage;
-	}
-
-	public long getExecutionTime() {
-		return executionTime;
-	}
-	
-	public long getRealExecutionTime() {
-		return realExecutionTime;
-	}
-	
-	public void setRealExecutionTime(long realExecutionTime) {
-		this.realExecutionTime = realExecutionTime;
-	}
-
-	public void setExecutionTime(long executionTime) {
-		this.executionTime = executionTime;
-	}
-
-	public boolean isConstructor() {
-		return isConstructor;
-	}
-
-	public void setConstructor(boolean isConstructor) {
-		this.isConstructor = isConstructor;
-	}
+//	public String getExceptionMessage() {
+//		return exceptionMessage;
+//	}
+//
+//	public void setExceptionMessage(String exceptionMessage) {
+//		this.exceptionMessage = exceptionMessage;
+//	}
+//
+//	public long getExecutionTime() {
+//		return executionTime;
+//	}
+//	
+//	public long getRealExecutionTime() {
+//		return realExecutionTime;
+//	}
+//	
+//	public void setRealExecutionTime(long realExecutionTime) {
+//		this.realExecutionTime = realExecutionTime;
+//	}
+//
+//	public void setExecutionTime(long executionTime) {
+//		this.executionTime = executionTime;
+//	}
+//
+//	public boolean isConstructor() {
+//		return isConstructor;
+//	}
+//
+//	public void setConstructor(boolean isConstructor) {
+//		this.isConstructor = isConstructor;
+//	}
 
 	public List<RuntimeScenario> getScenarios() {
 		return Collections.unmodifiableList(scenarios);
@@ -159,7 +159,8 @@ public class RuntimeNode implements Serializable {
 	}
 
 	public List<RuntimeNode> getChildren() {
-		return Collections.unmodifiableList(children);
+//		return Collections.unmodifiableList(children);
+		return children;
 	}
 
 	public void setChildren(List<RuntimeNode> children) {

@@ -2,6 +2,7 @@ package br.ufrn.ppgsc.fc.main;
 
 import java.io.File;
 import java.io.FileWriter;
+import java.io.PrintStream;
 import java.util.List;
 import java.util.Properties;
 
@@ -13,8 +14,10 @@ import br.ufrn.ppgsc.fc.database.GenericDAO;
 import br.ufrn.ppgsc.fc.dynamic.DynamicFlowExport;
 import br.ufrn.ppgsc.fc.graph_analysis.GraphAnalysis;
 import br.ufrn.ppgsc.fc.jdt.ChangedMethodUtil;
+import br.ufrn.ppgsc.fc.model.RuntimeNode;
 import br.ufrn.ppgsc.fc.model.RuntimeScenario;
 import br.ufrn.ppgsc.fc.util.PropertiesUtil;
+import br.ufrn.ppgsc.fc.util.RuntimeCallGraphPrintUtil;
 import br.ufrn.ppgsc.fc.wala.CallGraphWALA;
 
 public class Main {
@@ -40,14 +43,28 @@ public class Main {
 			System.out.println("\n-|Recovering covered paths from the database...");
 		    java.util.logging.Logger.getLogger("org.hibernate").setLevel(java.util.logging.Level.WARNING);
 			GenericDAO<RuntimeScenario> dao = new DatabaseService<RuntimeScenario>().getGenericDAO();
+			GenericDAO<RuntimeNode> nodeDAO = new DatabaseService<RuntimeNode>().getGenericDAO();
+			
 			List<RuntimeScenario> scenarios = dao.readAll(RuntimeScenario.class);
-			Appendable buffer = new StringBuffer();
+//			List<RuntimeNode> nodes = nodeDAO.readAll(RuntimeNode.class);
+			
+//			System.out.println("nodes all");
+//			nodes.clear();
+			PrintStream ps = new PrintStream("coveredPathsTree.txt");
+			
+//			Appendable buffer = new StringBuffer();
+			int count = 0;
 			for (RuntimeScenario runtimeScenario : scenarios) {
-				DynamicFlowExport.printScenarioTree(runtimeScenario, buffer);
+				System.out.println(count++ + runtimeScenario.getName());
+//				DynamicFlowExport.printScenarioTree(runtimeScenario, buffer);
+				RuntimeCallGraphPrintUtil.logScenarioTree(runtimeScenario, ps);
 			}
-			FileWriter out = new FileWriter("coveredPaths.txt");;
-			out.write(buffer.toString());
-			out.close();
+			
+			ps.close();
+			
+//			FileWriter out = new FileWriter("coveredPaths.txt");;
+//			out.write(buffer.toString());
+//			out.close();
 			System.out.println("\t-|Covered paths saved to file: coveredPaths.txt");
 		}
 		

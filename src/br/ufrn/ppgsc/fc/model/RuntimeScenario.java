@@ -57,25 +57,25 @@ public class RuntimeScenario implements Serializable {
 	 * As anotações antigas estão acima para mantermos a compatibilidade com o SIGAA
 	 * que usa uma versão mais antiga do Hibernate
 	 */
-	@ElementCollection
-	@CollectionTable(name = "scenario_context", joinColumns = @JoinColumn(name = "id"))
-	@MapKeyColumn(name = "key")
-	@Column(name = "value")
-	private Map<String, String> context;
+//	@ElementCollection
+//	@CollectionTable(name = "scenario_context", joinColumns = @JoinColumn(name = "id"))
+//	@MapKeyColumn(name = "key")
+//	@Column(name = "value")
+//	private Map<String, String> context;
 
 	public RuntimeScenario() {
 
 	}
 
-	public RuntimeScenario(String name, RuntimeNode root, Map<String, String> context) {
-		this.threadId = Thread.currentThread().getId();
+	public RuntimeScenario(String name, RuntimeNode root) {
+//		this.threadId = Thread.currentThread().getId();
 		this.root = root;
 		this.name = name;
-		this.date = new Date();
+//		this.date = new Date();
 //		this.execution = RuntimeCallGraph.getInstance().getCurrentExecution();
 
-		if (context != null)
-			this.context = Collections.unmodifiableMap(context);
+//		if (context != null)
+//			this.context = Collections.unmodifiableMap(context);
 	}
 
 	public long getId() {
@@ -126,13 +126,13 @@ public class RuntimeScenario implements Serializable {
 		this.root = root;
 	}
 
-	public Map<String, String> getContext() {
-		return context;
-	}
-
-	public void setContext(Map<String, String> context) {
-		this.context = context;
-	}
+//	public Map<String, String> getContext() {
+//		return context;
+//	}
+//
+//	public void setContext(Map<String, String> context) {
+//		this.context = context;
+//	}
 	
 	@Override
 	public String toString() {

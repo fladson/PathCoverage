@@ -9,28 +9,27 @@ import br.ufrn.ppgsc.fc.model.RuntimeScenario;
 
 public abstract class DynamicFlowExport {
 	
-	public static void printScenarioTree(RuntimeScenario tree, Appendable buffer) throws IOException {
-		buffer.append("Scenario: " + tree.getName());
-		
-		if (tree.getContext() != null && !tree.getContext().isEmpty()) {
-			Iterator<String> itr = tree.getContext().values().iterator();
-			while (itr.hasNext()) {
-				buffer.append(itr.next());
-				
-				if (itr.hasNext())
-					buffer.append(", ");
-			}
-		}
-		else {
-			buffer.append("-");
-		}
-		
-//		buffer.append(")\n");
-
-//		printInOrder(tree.getRoot(), buffer);
-		buffer.append(System.lineSeparator());
-		printTreeNode(tree.getRoot(), "", buffer);
-	}
+//	public static void printScenarioTree(RuntimeScenario tree, Appendable buffer) throws IOException {
+//		buffer.append("Scenario: " + tree.getName());
+//		if (tree.getContext() != null && !tree.getContext().isEmpty()) {
+//			Iterator<String> itr = tree.getContext().values().iterator();
+//			while (itr.hasNext()) {
+//				buffer.append(itr.next());
+//				if (itr.hasNext())
+//					buffer.append(", ");
+//			}
+//		}
+//		else {
+//			buffer.append("-");
+//		}
+//		
+////		buffer.append(")\n");
+//
+////		printInOrder(tree.getRoot(), buffer);
+//		System.out.println(buffer);
+//		buffer.append(System.lineSeparator());
+//		printTreeNode(tree.getRoot(), "", buffer);
+//	}
 	
 	private static void printInOrder(RuntimeNode root, Appendable buffer) throws IOException {
 		buffer.append(root.getMemberSignature());

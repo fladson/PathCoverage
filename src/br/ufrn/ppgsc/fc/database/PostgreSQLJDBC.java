@@ -19,10 +19,10 @@ public class PostgreSQLJDBC {
 		try {
 			Class.forName("org.postgresql.Driver");
 			c = DriverManager.getConnection(
-					"jdbc:postgresql://localhost:5432/scenario_analyzer_db",
-					"scenario_analyzer_user", "123456");
+					"jdbc:postgresql://localhost:5432/jetty",
+					"fladson", "opaco/");
 			c.setAutoCommit(false);
-//			System.out.println("Opened database successfully");
+			System.out.println("Opened database successfully");
 		} catch (ClassNotFoundException | SQLException e) {
 			e.printStackTrace();
 		}
@@ -67,7 +67,7 @@ public class PostgreSQLJDBC {
 		}
 		List<Node> nodes = new ArrayList<Node>();
 		String rootsIds = this.getRootsIds();
-//		System.out.println("Root Ids: " + rootsIds);
+		System.out.println("Root Ids: " + rootsIds);
 		try {
 			stmt = c.createStatement();
 			// Select das raízes
@@ -78,7 +78,7 @@ public class PostgreSQLJDBC {
 			}
 			rs.close();
 			stmt.close();
-//			c.close();
+			c.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
